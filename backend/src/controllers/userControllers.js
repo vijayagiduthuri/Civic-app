@@ -1,4 +1,5 @@
-import { insertRow } from "../../lib/dbService.js";
+import { insertRow } from "../lib/dbService.js";
+
 export const registerUser = async (req, res) => {
   try {
     const userData = req.body;
