@@ -56,7 +56,6 @@ export async function selectById(tableName, primaryKey, columns = []) {
   }
 }
 
-
 export async function selectRows(tableName, filters = {}, columns = [], sort = null) {
   try {
     if (!tableName) {
@@ -107,7 +106,6 @@ export async function selectRows(tableName, filters = {}, columns = [], sort = n
     return { success: false, error: err.message };
   }
 }
-
 
 export async function updateRowById(tableName, primaryKey, updates) {
   try {
