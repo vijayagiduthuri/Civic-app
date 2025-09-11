@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import userRoutes from "./src/routes/authRoutes.js"
 import issueRoutes from './src/routes/issueRoutes.js'
+import technicianRoutes from './src/routes/technicianRoutes.js'
+import pendingIssuesRoutes from './src/routes/pendingIssuesRoutes.js'
 
 dotenv.config();
 
@@ -14,6 +16,8 @@ app.use(express.json());
 
 app.use("/api/authUsers", userRoutes);
 app.use("/api/issues",issueRoutes)
+app.use("/api/technicians",technicianRoutes);
+app.use("/api/pendingIssues",pendingIssuesRoutes);
 
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {

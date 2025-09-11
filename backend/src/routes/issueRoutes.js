@@ -5,6 +5,8 @@ import {
   getAllIssues,
   getIssueById,
   getIssuesByUserId,
+  getPendingIssuesByDepartment,
+  getActiveIssueCoordinatesByDepartment
 } from "../controllers/issuesControllers.js";
 
 const router = express.Router();
@@ -18,5 +20,10 @@ router.get("/:id", getIssueById);
 router.delete("/:id", deleteIssue);
 
 router.get("/user/:id", getIssuesByUserId);
+
+router.post("/pending-by-department", getPendingIssuesByDepartment);
+
+router.post("/active-coordinates", getActiveIssueCoordinatesByDepartment);
+
 
 export default router;
