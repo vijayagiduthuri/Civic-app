@@ -139,3 +139,84 @@ export const getIssuesByUserId = async (req, res) => {
     });
   }
 };
+
+// Fetch pending issue coordinates by department
+export const getPendingIssuesByDepartment = async (req, res) => {
+  try {
+    const { department } = req.body;
+    //console.log(department)
+    if (!department) {
+      return res.status(400).json({
+        success: false,
+        message: "Department is required in request body"
+      });
+    }
+
+    // Query issues with department filter and status = pending
+    const result = await selectRows(
+      "issues",
+      { department, status: "pending" }, // filters
+      ["latitude", "longitude","status"] // select only required columns
+    );
+
+    if (result.success && result.data.length > 0) {
+      return res.status(200).json({
+        success: true,
+        data: result.data
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: `No pending issues found for department: ${department}`
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: err.message
+    });
+  }
+};
+
+// Fetch all issues except resolved issue coordinates by department
+export const getActiveIssueCoordinatesByDepartment = async (req, res) => {
+  try {
+    const { department } = req.body;
+
+    if (!department) {
+      return res.status(400).json({
+        success: false,
+        message: "Department is required in request body"
+      });
+    }
+
+    // Fetch only lat & lon where department matches AND status != resolved
+    const result = await selectRows(
+      "issues",
+      {
+        department,
+        status: { op: "neq", value: "resolved" }
+      },
+      ["latitude", "longitude","status"]
+    );
+
+    if (result.success && result.data.length > 0) {
+      return res.status(200).json({
+        success: true,
+        coordinates: result.data
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: `No active (pending/in_progress) issues found for department: ${department}`
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: err.message
+    });
+  }
+};
