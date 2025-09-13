@@ -56,30 +56,3 @@ export const getAllPendingIssues = async (req, res) => {
   }
 };
 
-// Delete resolved pending issues
-export const deleteResolvedPendingIssues = async (req, res) => {
-  try {
-    // Delete rows from pending_issues where status = resolved
-    const result = await dropRows("pending_issues", { status: "resolved" });
-
-    if (result.success) {
-      return res.status(200).json({
-        success: true,
-        message: "Resolved pending issues deleted successfully",
-        data: result.data
-      });
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: result.error
-      });
-    }
-
-  } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: err.message
-    });
-  }
-};
