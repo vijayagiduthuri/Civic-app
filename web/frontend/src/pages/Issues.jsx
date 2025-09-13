@@ -151,6 +151,9 @@ const Label = ({ children, className = "", ...props }) => (
 )
 
 export default function Issues() {
+  // Define current page for navigation highlighting
+  const currentPage = "issues"
+  
   const [issues, setIssues] = useState([
     {
       id: "SAN-2024-001",
@@ -160,7 +163,6 @@ export default function Issues() {
       coordinates: { lat: 12.9716, lng: 77.5946 },
       dateReported: "2024-01-15",
       citizenName: "Rajesh Kumar",
-      citizenPhone: "+91-98765-43210",
       citizenEmail: "rajesh.kumar@gmail.com",
       status: "Open",
       assignedWorker: null,
@@ -168,14 +170,6 @@ export default function Issues() {
       category: "Waste Management",
       description:
         "Large garbage bin overflowing with waste, attracting pests and creating unsanitary conditions. Garbage scattered around the area.",
-      photos: [
-        "https://images.stockcake.com/public/f/b/4/fb45bb5c-79c3-47c3-aa3b-88cf36aa3352_large/urban-waste-overflow-stockcake.jpg",
-      ],
-      afterPhotos: [],
-      statusHistory: [{ date: "2024-01-15", status: "Reported", note: "Issue reported by citizen" }],
-      citizenFeedback: null,
-      estimatedCost: "₹12,000",
-      urgencyLevel: "High",
     },
     {
       id: "SAN-2024-002",
@@ -185,7 +179,6 @@ export default function Issues() {
       coordinates: { lat: 12.9352, lng: 77.6245 },
       dateReported: "2024-01-14",
       citizenName: "Priya Sharma",
-      citizenPhone: "+91-87654-32109",
       citizenEmail: "priya.sharma@gmail.com",
       status: "In Progress",
       assignedWorker: "Suresh Patil",
@@ -193,18 +186,6 @@ export default function Issues() {
       category: "Drainage System",
       description:
         "Storm drain completely blocked with leaves, debris, and litter. Water pooling during rain, creating potential flooding risk.",
-      photos: [
-        "https://img.freepik.com/premium-photo/storm-drain-clogged-with-trash-debris-causing-flooding-contamination_974629-202395.jpg",
-      ],
-      afterPhotos: [],
-      statusHistory: [
-        { date: "2024-01-14", status: "Reported", note: "Issue reported by citizen" },
-        { date: "2024-01-16", status: "Assigned", note: "Assigned to Suresh Patil" },
-        { date: "2024-01-17", status: "In Progress", note: "Cleaning work started" },
-      ],
-      citizenFeedback: null,
-      estimatedCost: "₹16,000",
-      urgencyLevel: "Medium",
     },
     {
       id: "SAN-2024-003",
@@ -213,7 +194,6 @@ export default function Issues() {
       coordinates: { lat: 12.9698, lng: 77.5906 },
       dateReported: "2024-01-13",
       citizenName: "Amit Patel",
-      citizenPhone: "+91-76543-21098",
       citizenEmail: "amit.patel@yahoo.com",
       status: "Resolved",
       assignedWorker: "Lakshmi Devi",
@@ -221,20 +201,6 @@ export default function Issues() {
       category: "Public Restrooms",
       description:
         "Public restroom in extremely unsanitary condition. Broken fixtures, no soap, and poor maintenance affecting public health.",
-      photos: ["https://www.shutterstock.com/image-photo/dirty-public-toilet-room-600nw-1111510655.jpg"],
-      afterPhotos: ["https://tse1.mm.bing.net/th/id/OIP.P7vtj5IRxw_M1Es-7rO2FQHaFj?pid=Api&P=0&h=180"],
-      statusHistory: [
-        { date: "2024-01-13", status: "Reported", note: "Issue reported by citizen" },
-        { date: "2024-01-14", status: "Assigned", note: "Assigned to Lakshmi Devi" },
-        { date: "2024-01-15", status: "In Progress", note: "Deep cleaning and repairs in progress" },
-        { date: "2024-01-16", status: "Resolved", note: "Restroom cleaned and fixtures repaired" },
-      ],
-      citizenFeedback: {
-        rating: 5,
-        comment: "Excellent work! The restroom is now clean and fully functional. Thank you for the quick response.",
-      },
-      estimatedCost: "₹24,000",
-      urgencyLevel: "High",
     },
     {
       id: "SAN-2024-004",
@@ -244,7 +210,6 @@ export default function Issues() {
       coordinates: { lat: 12.9698, lng: 77.7499 },
       dateReported: "2024-01-12",
       citizenName: "Deepika Reddy",
-      citizenPhone: "+91-65432-10987",
       citizenEmail: "deepika.reddy@hotmail.com",
       status: "In Progress",
       assignedWorker: "Ravi Kumar",
@@ -252,18 +217,6 @@ export default function Issues() {
       category: "Illegal Dumping",
       description:
         "Large pile of construction debris and household waste illegally dumped in service road. Environmental hazard and blocking access.",
-      photos: [
-        "https://circularphiladelphia.org/staging/wp-content/uploads/2022/10/Construction_debris_dumped_709x399.jpg",
-      ],
-      afterPhotos: [],
-      statusHistory: [
-        { date: "2024-01-12", status: "Reported", note: "Issue reported by citizen" },
-        { date: "2024-01-13", status: "Assigned", note: "Assigned to Ravi Kumar" },
-        { date: "2024-01-14", status: "In Progress", note: "Removal equipment scheduled" },
-      ],
-      citizenFeedback: null,
-      estimatedCost: "₹64,000",
-      urgencyLevel: "High",
     },
     {
       id: "SAN-2024-005",
@@ -273,7 +226,6 @@ export default function Issues() {
       coordinates: { lat: 12.9279, lng: 77.5937 },
       dateReported: "2024-01-11",
       citizenName: "Vikram Singh",
-      citizenPhone: "+91-54321-09876",
       citizenEmail: "vikram.singh@gmail.com",
       status: "Open",
       assignedWorker: null,
@@ -281,14 +233,6 @@ export default function Issues() {
       category: "Sewer System",
       description:
         "Broken sewer cover creating safety hazard and potential for sewer gas leakage. Cover partially collapsed into opening.",
-      photos: [
-        "https://media.istockphoto.com/id/1248462267/photo/close-up-of-ruptured-sewer-rusty-pipeline-which-cause-sewage-leakage-stream-and-pollution-old.jpg?s=612x612&w=0&k=20&c=fFaVqjGjC-wVGNc0b7fJtZ7E5cl4AOzM1__QETSlZ5k=",
-      ],
-      afterPhotos: [],
-      statusHistory: [{ date: "2024-01-11", status: "Reported", note: "Issue reported by citizen" }],
-      citizenFeedback: null,
-      estimatedCost: "₹32,000",
-      urgencyLevel: "Medium",
     },
     {
       id: "SAN-2024-006",
@@ -297,7 +241,6 @@ export default function Issues() {
       coordinates: { lat: 12.9279, lng: 77.6271 },
       dateReported: "2024-01-10",
       citizenName: "Anita Gupta",
-      citizenPhone: "+91-43210-98765",
       citizenEmail: "anita.gupta@rediffmail.com",
       status: "Resolved",
       assignedWorker: "Manoj Yadav",
@@ -305,20 +248,6 @@ export default function Issues() {
       category: "Recycling Management",
       description:
         "Multiple recycling bins overflowing with materials scattered by wind. Affecting cleanliness of shopping area.",
-      photos: ["https://tse4.mm.bing.net/th/id/OIP.B04dWyGds6Tlp1SP0YZPDQHaDt?pid=Api&P=0&h=180"],
-      afterPhotos: ["https://tse1.mm.bing.net/th/id/OIP.jIVyzSYJnwdqlkNG5BgZ2wHaFb?pid=Api&P=0&h=180"],
-      statusHistory: [
-        { date: "2024-01-10", status: "Reported", note: "Issue reported by citizen" },
-        { date: "2024-01-11", status: "Assigned", note: "Assigned to Manoj Yadav" },
-        { date: "2024-01-12", status: "In Progress", note: "Collection and cleanup started" },
-        { date: "2024-01-13", status: "Resolved", note: "Bins emptied and area cleaned" },
-      ],
-      citizenFeedback: {
-        rating: 4,
-        comment: "Good response time. The area looks much better now. Maybe increase collection frequency?",
-      },
-      estimatedCost: "₹8,000",
-      urgencyLevel: "Low",
     },
   ])
 
@@ -405,10 +334,6 @@ export default function Issues() {
           const updatedIssue = {
             ...issue,
             status: newStatus,
-            statusHistory: [
-              ...issue.statusHistory,
-              { date: new Date().toISOString().split("T")[0], status: newStatus, note },
-            ],
           }
           if (assignedWorker) {
             updatedIssue.assignedWorker = assignedWorker
@@ -467,9 +392,6 @@ export default function Issues() {
         </div>
 
         <div className="space-y-3">
-          
-          
-
           <div className="grid grid-cols-2 gap-2">
             <Button size="sm" variant="outline" onClick={getDirections} className="text-xs bg-transparent">
               <Navigation className="h-3 w-3 mr-1" />
@@ -503,25 +425,41 @@ export default function Issues() {
               <div className="hidden md:flex items-center space-x-2">
                 <a
                   href="/home"
-                  className="text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 border-b-2 border-sky-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                  className={`px-4 py-2 rounded-lg text-sm transition-all duration-300 ${
+                    currentPage === "home"
+                      ? "text-white bg-white/10 backdrop-blur-sm font-semibold border-b-2 border-sky-300 shadow-sm"
+                      : "text-sky-100 hover:text-white hover:bg-white/10 backdrop-blur-sm font-medium hover:border-b-2 hover:border-sky-300 hover:shadow-md transform hover:-translate-y-0.5"
+                  }`}
                 >
                   Home
                 </a>
                 <a
                   href="/issues"
-                  className="text-sky-100 hover:text-white hover:bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:border-b-2 hover:border-sky-300 hover:shadow-md transform hover:-translate-y-0.5"
+                  className={`px-4 py-2 rounded-lg text-sm transition-all duration-300 ${
+                    currentPage === "issues"
+                      ? "text-white bg-white/10 backdrop-blur-sm font-semibold border-b-2 border-sky-300 shadow-sm"
+                      : "text-sky-100 hover:text-white hover:bg-white/10 backdrop-blur-sm font-medium hover:border-b-2 hover:border-sky-300 hover:shadow-md transform hover:-translate-y-0.5"
+                  }`}
                 >
                   Issues
                 </a>
                 <a
                   href="/workers"
-                  className="text-sky-100 hover:text-white hover:bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:border-b-2 hover:border-sky-300 hover:shadow-md transform hover:-translate-y-0.5"
+                  className={`px-4 py-2 rounded-lg text-sm transition-all duration-300 ${
+                    currentPage === "workers"
+                      ? "text-white bg-white/10 backdrop-blur-sm font-semibold border-b-2 border-sky-300 shadow-sm"
+                      : "text-sky-100 hover:text-white hover:bg-white/10 backdrop-blur-sm font-medium hover:border-b-2 hover:border-sky-300 hover:shadow-md transform hover:-translate-y-0.5"
+                  }`}
                 >
                   Workers
                 </a>
                 <a
                   href="/overview"
-                  className="text-sky-100 hover:text-white hover:bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:border-b-2 hover:border-sky-300 hover:shadow-md transform hover:-translate-y-0.5"
+                  className={`px-4 py-2 rounded-lg text-sm transition-all duration-300 ${
+                    currentPage === "overview"
+                      ? "text-white bg-white/10 backdrop-blur-sm font-semibold border-b-2 border-sky-300 shadow-sm"
+                      : "text-sky-100 hover:text-white hover:bg-white/10 backdrop-blur-sm font-medium hover:border-b-2 hover:border-sky-300 hover:shadow-md transform hover:-translate-y-0.5"
+                  }`}
                 >
                   Overview
                 </a>
@@ -531,7 +469,7 @@ export default function Issues() {
             {/* Right side - User info */}
             <div className="flex items-center space-x-4 group">
               <div className="text-white text-sm">
-                <span className="font-semibold drop-shadow-sm">Admin User</span>
+                <span className="font-semibold drop-shadow-sm">Sanitation Department</span>
               </div>
               <div className="w-8 h-8 bg-gradient-to-br from-sky-400 to-sky-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 ring-2 ring-white/20 group-hover:ring-white/40">
                 <User className="h-5 w-5 text-white drop-shadow-sm" />
@@ -541,32 +479,7 @@ export default function Issues() {
         </div>
       </nav>
 
-      {/* Header */}
-      <header className="bg-white border-b border-sky-100 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
-              <div className="flex-shrink-0">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-sky-600 rounded-lg flex items-center justify-center">
-                    <Trash2 className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-sky-900">Sanitation Issues Management</h1>
-                    <p className="text-sm text-sky-600">Government Administration Portal</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="bg-sky-50 text-sky-700 border border-sky-200 px-4 py-2 rounded-full text-sm font-medium">
-                Admin Dashboard
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
+      
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Enhanced Filters and Search */}
@@ -612,21 +525,23 @@ export default function Issues() {
             >
               <CardContent className="p-0">
                 <div className="flex flex-col lg:flex-row">
-                  {/* Image Section */}
-                  <div className="lg:w-80 h-48 lg:h-auto relative overflow-hidden rounded-l-lg">
-                    <img
-                      src={issue.photo || "/placeholder.svg"}
-                      alt="Sanitation Issue"
-                      className="w-100 h-70 object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
-                      onClick={() => handlePhotoClick(issue.photo)}
-                    />
-                    <div className="absolute top-4 left-4">
-                      <Badge className={`${getPriorityColor(issue.priority)} shadow-lg`}>
-                        {issue.priority} Priority
-                      </Badge>
-                    </div>
-                    <div className="absolute top-4 right-4">
-                      <Badge className={`${getStatusColor(issue.status)} shadow-lg`}>{issue.status}</Badge>
+                  {/* Fixed Image Section with proper padding and aspect ratio */}
+                  <div className="lg:w-80 lg:flex-shrink-0 p-4">
+                    <div className="relative w-full h-48 overflow-hidden rounded-lg bg-gray-100">
+                      <img
+                        src={issue.photo || "/placeholder.svg"}
+                        alt="Sanitation Issue"
+                        className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                        onClick={() => handlePhotoClick(issue.photo)}
+                      />
+                      <div className="absolute top-3 left-3">
+                        <Badge className={`${getPriorityColor(issue.priority)} shadow-lg`}>
+                          {issue.priority} Priority
+                        </Badge>
+                      </div>
+                      <div className="absolute top-3 right-3">
+                        <Badge className={`${getStatusColor(issue.status)} shadow-lg`}>{issue.status}</Badge>
+                      </div>
                     </div>
                   </div>
 
@@ -670,42 +585,8 @@ export default function Issues() {
                               <span className="text-sm font-medium text-gray-700">Assigned:</span>
                               <span className="text-sm text-gray-600">{issue.assignedWorker || "Unassigned"}</span>
                             </div>
-                            <div className="flex items-center space-x-2">
-                              <AlertTriangle className="h-4 w-4 text-sky-500" />
-                              <span className="text-sm font-medium text-gray-700">Est. Cost:</span>
-                              <span className="text-sm text-gray-600">{issue.estimatedCost}</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Clock className="h-4 w-4 text-sky-500" />
-                              <span className="text-sm font-medium text-gray-700">Urgency:</span>
-                              <Badge className={getPriorityColor(issue.priority)} size="sm">
-                                {issue.urgencyLevel}
-                              </Badge>
-                            </div>
                           </div>
                         </div>
-
-                        {/* Citizen Feedback Preview */}
-                        {issue.citizenFeedback && (
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <div className="flex">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`h-3 w-3 ${
-                                      i < issue.citizenFeedback.rating
-                                        ? "text-yellow-400 fill-current"
-                                        : "text-gray-300"
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                              <span className="text-xs font-medium text-green-700">Citizen Feedback</span>
-                            </div>
-                            <p className="text-xs text-green-600 italic">"{issue.citizenFeedback.comment}"</p>
-                          </div>
-                        )}
                       </div>
 
                       {/* Action Buttons */}
@@ -798,10 +679,6 @@ export default function Issues() {
                       <Label className="text-sm font-medium text-gray-700">Status</Label>
                       <Badge className={`${getStatusColor(selectedIssue.status)} mt-1`}>{selectedIssue.status}</Badge>
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium text-gray-700">Estimated Cost</Label>
-                      <p className="text-sm text-gray-900 mt-1">{selectedIssue.estimatedCost}</p>
-                    </div>
                   </div>
                 </div>
 
@@ -814,10 +691,6 @@ export default function Issues() {
                         <User className="h-4 w-4 text-gray-400 mr-1" />
                         {selectedIssue.citizenName}
                       </p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium text-gray-700">Phone</Label>
-                      <p className="text-sm text-gray-900 mt-1">{selectedIssue.citizenPhone}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium text-gray-700">Email</Label>
@@ -837,89 +710,24 @@ export default function Issues() {
                 <p className="text-sm text-gray-700 bg-gray-50 p-4 rounded-lg">{selectedIssue.description}</p>
               </div>
 
-              {/* Photos */}
+              {/* Single Photo with proper padding */}
               <div>
-                <h3 className="text-lg font-semibold mb-3 text-sky-900">Issue Photos</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {selectedIssue.photos.map((photo, index) => (
-                    <img
-                      key={index}
-                      src={photo || "/placeholder.svg"}
-                      alt={`Issue photo ${index + 1}`}
-                      className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80"
-                      onClick={() => handlePhotoClick(photo, index)}
-                    />
-                  ))}
+                <h3 className="text-lg font-semibold mb-3 text-sky-900">Issue Photo</h3>
+                <div className="w-full max-w-md p-2 bg-gray-50 rounded-lg">
+                  <img
+                    src={selectedIssue.photo || "/placeholder.svg"}
+                    alt="Issue photo"
+                    className="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-80"
+                    onClick={() => handlePhotoClick(selectedIssue.photo)}
+                  />
                 </div>
               </div>
-
-              {/* After Photos */}
-              {selectedIssue.afterPhotos.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-3 text-sky-900">After Repair Photos</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {selectedIssue.afterPhotos.map((photo, index) => (
-                      <img
-                        key={index}
-                        src={photo || "/placeholder.svg"}
-                        alt={`After photo ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80"
-                        onClick={() => handlePhotoClick(photo, index)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Interactive Map */}
               <div>
                 <h3 className="text-lg font-semibold mb-3 text-sky-900">Location Map</h3>
                 <FunctionalMap coordinates={selectedIssue.coordinates} location={selectedIssue.location} />
               </div>
-
-              {/* Status History */}
-              <div>
-                <h3 className="text-lg font-semibold mb-3 text-sky-900">Status History</h3>
-                <div className="space-y-3">
-                  {selectedIssue.statusHistory.map((entry, index) => (
-                    <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                      <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <Badge className={getStatusColor(entry.status)}>{entry.status}</Badge>
-                          <span className="text-sm text-gray-500">{entry.date}</span>
-                        </div>
-                        <p className="text-sm text-gray-700 mt-1">{entry.note}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Citizen Feedback */}
-              {selectedIssue.citizenFeedback && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-3 text-sky-900">Citizen Feedback</h3>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <div className="flex items-center mb-2">
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < selectedIssue.citizenFeedback.rating
-                                ? "text-yellow-400 fill-current"
-                                : "text-gray-300"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="ml-2 text-sm font-medium">{selectedIssue.citizenFeedback.rating}/5</span>
-                    </div>
-                    <p className="text-sm text-gray-700">"{selectedIssue.citizenFeedback.comment}"</p>
-                  </div>
-                </div>
-              )}
 
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 pt-4 border-t">
@@ -960,7 +768,7 @@ export default function Issues() {
             <div>
               <Label htmlFor="worker">Select Worker</Label>
               <Select value={selectedWorker} onValueChange={setSelectedWorker}>
-                <SelectItem value="none">Select a worker...</SelectItem>
+                <SelectItem value="">Select a worker...</SelectItem>
                 {workers.map((worker) => (
                   <SelectItem key={worker} value={worker}>
                     {worker}
@@ -982,7 +790,7 @@ export default function Issues() {
               <Button variant="outline" onClick={() => setShowAssignModal(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleAssignWorkerSubmit} disabled={selectedWorker === "none"}>
+              <Button onClick={handleAssignWorkerSubmit} disabled={!selectedWorker}>
                 Assign Worker
               </Button>
             </div>
@@ -1000,7 +808,7 @@ export default function Issues() {
             <div>
               <Label htmlFor="status">New Status</Label>
               <Select value={newStatus} onValueChange={setNewStatus}>
-                <SelectItem value="none">Select new status...</SelectItem>
+                <SelectItem value="">Select new status...</SelectItem>
                 <SelectItem value="Open">Open</SelectItem>
                 <SelectItem value="In Progress">In Progress</SelectItem>
                 <SelectItem value="Resolved">Resolved</SelectItem>
@@ -1020,7 +828,7 @@ export default function Issues() {
               <Button variant="outline" onClick={() => setShowStatusModal(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleStatusUpdateSubmit} disabled={newStatus === "none"}>
+              <Button onClick={handleStatusUpdateSubmit} disabled={!newStatus}>
                 Update Status
               </Button>
             </div>
@@ -1033,7 +841,7 @@ export default function Issues() {
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
-              <span>Photo Gallery</span>
+              <span>Photo View</span>
               <Button variant="ghost" size="icon" onClick={() => setShowPhotoModal(false)}>
                 <X className="h-4 w-4" />
               </Button>
@@ -1041,44 +849,13 @@ export default function Issues() {
           </DialogHeader>
           {selectedPhoto && (
             <div className="space-y-4">
-              <div className="relative">
+              <div className="relative p-4 bg-gray-50 rounded-lg">
                 <img
                   src={selectedPhoto || "/placeholder.svg"}
                   alt="Issue photo"
                   className="w-full max-h-96 object-contain rounded-lg"
                 />
               </div>
-
-              {selectedIssue && (selectedIssue.photos.length > 1 || selectedIssue.afterPhotos.length > 0) && (
-                <div className="flex justify-center space-x-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const allPhotos = [...selectedIssue.photos, ...selectedIssue.afterPhotos]
-                      const prevIndex = currentPhotoIndex > 0 ? currentPhotoIndex - 1 : allPhotos.length - 1
-                      setCurrentPhotoIndex(prevIndex)
-                      setSelectedPhoto(allPhotos[prevIndex])
-                    }}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const allPhotos = [...selectedIssue.photos, ...selectedIssue.afterPhotos]
-                      const nextIndex = currentPhotoIndex < allPhotos.length - 1 ? currentPhotoIndex + 1 : 0
-                      setCurrentPhotoIndex(nextIndex)
-                      setSelectedPhoto(allPhotos[nextIndex])
-                    }}
-                  >
-                    Next
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
             </div>
           )}
         </DialogContent>

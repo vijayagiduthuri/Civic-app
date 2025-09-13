@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from './pages/LoginPage';
 import Issues from './pages/Issues';
 import Home from './pages/Home';
+import LandingPage from './pages/LandingPage';
+
 
 
 function App() {
@@ -14,6 +16,7 @@ function App() {
     <Route path="/login" element={<LoginPage/>}/>
     <Route path="issues" element={<Issues/>}/>
     <Route path="/home" element={<Home/>}/>
+    <Route path="/" element={<LandingPage/>}/>
    </Routes>
   )
 }
