@@ -6,7 +6,9 @@ import {
   getIssueById,
   getIssuesByUserId,
   getPendingIssuesByDepartment,
-  getActiveIssueCoordinatesByDepartment
+  getActiveIssueCoordinatesByDepartment,
+  getNearbyIssuesByIdAndDept,
+  updateIssueStatus,
 } from "../controllers/issuesControllers.js";
 
 const router = express.Router();
@@ -25,5 +27,8 @@ router.post("/pending-by-department", getPendingIssuesByDepartment);
 
 router.post("/active-coordinates", getActiveIssueCoordinatesByDepartment);
 
+router.post("/nearbyIssue-by-department", getNearbyIssuesByIdAndDept);
+
+router.post("/status",updateIssueStatus)
 
 export default router;
