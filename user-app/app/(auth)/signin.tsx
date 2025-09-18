@@ -1,5 +1,6 @@
 import { useSignIn, useOAuth } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
+import * as Linking from "expo-linking";
 import {
   Text,
   TextInput,
@@ -14,30 +15,42 @@ import {
 import React, { useState, useRef } from "react";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Ionicons } from "@expo/vector-icons";
+import { getLinkingConfig } from "expo-router/build/getLinkingConfig";
 
 export default function SignIn(): React.ReactElement {
   const { signIn, setActive, isLoaded } = useSignIn();
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
   const router = useRouter();
 
-  const [emailAddress] = useState("");
-  const [password] = useState("");
+
   const [error, setError] = useState("");
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const onGoogleSignIn = async (): Promise<void> => {
-    if (!isLoaded || isGoogleLoading) return;
+    if (isGoogleLoading) return;
     setIsGoogleLoading(true);
-    setError("");
+
     try {
-      const { createdSessionId } = await startOAuthFlow();
-      if (createdSessionId) {
+      const redirectUrl = Linking.createURL("oauth-callback");
+      const { createdSessionId, setActive } = await startOAuthFlow({
+        redirectUrl,
+      });
+
+      if (!createdSessionId || !setActive) {
+        console.log("createdSessionId:", createdSessionId);
+        console.log("setActive exists:", !!setActive);
+        throw new Error("Session not created");
+      } else {
+
         await setActive({ session: createdSessionId });
-        router.replace("/(tabs)");
+        router.replace("/(tabs)"); // ✅ user goes directly to tabs
       }
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
-      Alert.alert("Sign In Failed", errorObj?.message || "Unable to sign in with Google.");
+      Alert.alert(
+        "Sign In Failed",
+        errorObj?.message || "Unable to sign in with Google."
+      );
     } finally {
       setIsGoogleLoading(false);
     }
