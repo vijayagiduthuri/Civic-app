@@ -269,6 +269,14 @@ export default function Issues() {
 
   const workers = ["Suresh Patil", "Lakshmi Devi", "Ravi Kumar", "Manoj Yadav", "Pradeep Sharma"]
 
+  // Navigation items with their page identifiers
+  const navigationItems = [
+    { href: "/home", label: "Home", page: "home" },
+    { href: "/issues", label: "Issues", page: "issues" },
+    { href: "/workers", label: "Workers", page: "workers" },
+    { href: "/overview", label: "Overview", page: "overview" },
+  ]
+
   const filteredIssues = issues.filter((issue) => {
     const matchesSearch =
       issue.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -410,8 +418,8 @@ export default function Issues() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white">
       {/* Top Navigation Bar */}
-      <nav className="bg-gradient-to-r from-sky-600 via-sky-700 to-blue-700 shadow-xl border-b border-sky-500/20 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="bg-gradient-to-r from-sky-600 via-sky-700 to-blue-700 shadow-xl border-b border-sky-500/20 backdrop-blur-sm flex-shrink-0">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-8">
               <div className="flex items-center space-x-3 group">
@@ -421,52 +429,30 @@ export default function Issues() {
                 <span className="text-white font-bold text-lg tracking-wide drop-shadow-sm">Gov Portal</span>
               </div>
 
-              {/* Navigation Links */}
               <div className="hidden md:flex items-center space-x-2">
-                <a
-                  href="/home"
-                  className={`px-4 py-2 rounded-lg text-sm transition-all duration-300 ${
-                    currentPage === "home"
-                      ? "text-white bg-white/10 backdrop-blur-sm font-semibold border-b-2 border-sky-300 shadow-sm"
-                      : "text-sky-100 hover:text-white hover:bg-white/10 backdrop-blur-sm font-medium hover:border-b-2 hover:border-sky-300 hover:shadow-md transform hover:-translate-y-0.5"
-                  }`}
-                >
-                  Home
-                </a>
-                <a
-                  href="/issues"
-                  className={`px-4 py-2 rounded-lg text-sm transition-all duration-300 ${
-                    currentPage === "issues"
-                      ? "text-white bg-white/10 backdrop-blur-sm font-semibold border-b-2 border-sky-300 shadow-sm"
-                      : "text-sky-100 hover:text-white hover:bg-white/10 backdrop-blur-sm font-medium hover:border-b-2 hover:border-sky-300 hover:shadow-md transform hover:-translate-y-0.5"
-                  }`}
-                >
-                  Issues
-                </a>
-                <a
-                  href="/workers"
-                  className={`px-4 py-2 rounded-lg text-sm transition-all duration-300 ${
-                    currentPage === "workers"
-                      ? "text-white bg-white/10 backdrop-blur-sm font-semibold border-b-2 border-sky-300 shadow-sm"
-                      : "text-sky-100 hover:text-white hover:bg-white/10 backdrop-blur-sm font-medium hover:border-b-2 hover:border-sky-300 hover:shadow-md transform hover:-translate-y-0.5"
-                  }`}
-                >
-                  Workers
-                </a>
-                <a
-                  href="/overview"
-                  className={`px-4 py-2 rounded-lg text-sm transition-all duration-300 ${
-                    currentPage === "overview"
-                      ? "text-white bg-white/10 backdrop-blur-sm font-semibold border-b-2 border-sky-300 shadow-sm"
-                      : "text-sky-100 hover:text-white hover:bg-white/10 backdrop-blur-sm font-medium hover:border-b-2 hover:border-sky-300 hover:shadow-md transform hover:-translate-y-0.5"
-                  }`}
-                >
-                  Overview
-                </a>
+                {navigationItems.map((item) => (
+                  <a
+                    key={item.page}
+                    href={item.href}
+                    className={`px-4 py-2 text-sm font-medium transition-colors duration-300 relative group ${
+                      currentPage === item.page 
+                        ? "text-white font-semibold" 
+                        : "text-sky-100 hover:text-white"
+                    }`}
+                  >
+                    {item.label}
+                    <span 
+                      className={`absolute bottom-0 left-0 w-full h-0.5 bg-sky-300 transform transition-transform duration-300 ${
+                        currentPage === item.page 
+                          ? "scale-x-100" 
+                          : "scale-x-0 group-hover:scale-x-100"
+                      }`}
+                    />
+                  </a>
+                ))}
               </div>
             </div>
 
-            {/* Right side - User info */}
             <div className="flex items-center space-x-4 group">
               <div className="text-white text-sm">
                 <span className="font-semibold drop-shadow-sm">Sanitation Department</span>
