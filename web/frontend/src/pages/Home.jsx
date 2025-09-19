@@ -125,14 +125,6 @@ const Home = () => {
     { id: 6, name: 'Manoj Yadav', status: 'available', currentTask: null, phone: '+91-9876543306' }
   ]);
 
-  // Calculate statistics
-  const todayStats = {
-    total: issues.length,
-    pending: issues.filter(issue => issue.status === 'pending').length,
-    inProgress: issues.filter(issue => issue.status === 'in-progress').length,
-    resolved: issues.filter(issue => issue.status === 'resolved').length
-  };
-
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending': return '#ef4444';
@@ -167,15 +159,6 @@ const Home = () => {
       case 'Medium': return 'text-yellow-600 bg-yellow-100';
       case 'Low': return 'text-green-600 bg-green-100';
       default: return 'text-gray-600 bg-gray-100';
-    }
-  };
-
-  const getWorkerStatusColor = (status) => {
-    switch (status) {
-      case 'available': return 'text-green-700 bg-green-100';
-      case 'busy': return 'text-orange-700 bg-orange-100';
-      case 'not-available': return 'text-red-700 bg-red-100';
-      default: return 'text-gray-700 bg-gray-100';
     }
   };
 
@@ -316,7 +299,7 @@ const Home = () => {
   const renderIssueCard = (issue) => (
     <div 
       key={issue.id} 
-      className={`bg-gray-50 rounded-lg p-4 border-l-4 cursor-pointer hover:shadow-md transition-all ${
+      className={`bg-gray-50 rounded-lg p-3 border-l-4 cursor-pointer hover:shadow-md transition-all ${
         selectedIssue?.id === issue.id ? 'border-sky-500 bg-sky-50' : 'border-gray-300'
       }`}
       onClick={() => setSelectedIssue(issue)}
@@ -327,9 +310,9 @@ const Home = () => {
           {getStatusText(issue.status)}
         </div>
       </div>
-      <p className="text-xs text-gray-600 mb-2">{issue.location}</p>
+      <p className="text-xs text-gray-600 mb-2 line-clamp-1">{issue.location}</p>
       <div className="flex justify-between items-center text-xs text-gray-500">
-        <span>{issue.date} • {issue.time}</span>
+        <span>{issue.date}</span>
         <span className={`px-2 py-1 rounded-full font-medium ${getPriorityColor(issue.priority)}`}>
           {issue.priority}
         </span>
@@ -338,10 +321,10 @@ const Home = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white">
+    <div className="h-screen bg-gradient-to-br from-sky-50 to-white flex flex-col overflow-hidden">
       {/* Top Navigation Bar */}
-      <nav className="bg-gradient-to-r from-sky-600 via-sky-700 to-blue-700 shadow-xl border-b border-sky-500/20 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="bg-gradient-to-r from-sky-600 via-sky-700 to-blue-700 shadow-xl border-b border-sky-500/20 backdrop-blur-sm flex-shrink-0">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-8">
               <div className="flex items-center space-x-3 group">
@@ -352,30 +335,31 @@ const Home = () => {
               </div>
 
               <div className="hidden md:flex items-center space-x-2">
-                <a
-                  href="/home"
-                  className="text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 border-b-2 border-sky-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
-                >
-                  Home
-                </a>
-                <a
-                  href="/issues"
-                  className="text-sky-100 hover:text-white hover:bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:border-b-2 hover:border-sky-300 hover:shadow-md transform hover:-translate-y-0.5"
-                >
-                  Issues
-                </a>
-                <a
-                  href="/workers"
-                  className="text-sky-100 hover:text-white hover:bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:border-b-2 hover:border-sky-300 hover:shadow-md transform hover:-translate-y-0.5"
-                >
-                  Workers
-                </a>
-                <a
-                  href="/overview"
-                  className="text-sky-100 hover:text-white hover:bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:border-b-2 hover:border-sky-300 hover:shadow-md transform hover:-translate-y-0.5"
-                >
-                  Overview
-                </a>
+                {[
+                  { href: "/home", label: "Home", page: "home" },
+                  { href: "/issues", label: "Issues", page: "issues" },
+                  { href: "/workers", label: "Workers", page: "workers" },
+                  { href: "/overview", label: "Overview", page: "overview" },
+                ].map((item) => (
+                  <a
+                    key={item.page}
+                    href={item.href}
+                    className={`px-4 py-2 text-sm font-medium transition-colors duration-300 relative group ${
+                      "home" === item.page 
+                        ? "text-white font-semibold" 
+                        : "text-sky-100 hover:text-white"
+                    }`}
+                  >
+                    {item.label}
+                    <span 
+                      className={`absolute bottom-0 left-0 w-full h-0.5 bg-sky-300 transform transition-transform duration-300 ${
+                        "home" === item.page 
+                          ? "scale-x-100" 
+                          : "scale-x-0 group-hover:scale-x-100"
+                      }`}
+                    />
+                  </a>
+                ))}
               </div>
             </div>
 
@@ -391,46 +375,45 @@ const Home = () => {
         </div>
       </nav>
 
-      {/* Main Dashboard */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className={`flex gap-6 transition-all duration-300 ${showAssignModal ? 'blur-sm' : ''}`}>
-          {/* Left Panel - Issues Card and Statistics */}
-          <div className="w-1/3 space-y-6">
-            {/* Issues Card */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">
-                  {selectedIssue ? 'Issue Details' : `All Issues (${issues.length})`}
-                </h2>
-                {selectedIssue && (
-                  <button 
-                    onClick={() => setSelectedIssue(null)}
-                    className="text-sky-600 hover:text-sky-800 text-sm font-medium"
-                  >
-                    ← Back to All
-                  </button>
-                )}
-              </div>
-              
+      {/* Main Dashboard - Fixed Height */}
+      <div className={`flex-1 w-full px-4 py-4 flex gap-4 min-h-0 transition-all duration-300 ${showAssignModal ? 'blur-sm' : ''}`}>
+        {/* Left Panel - Issues Card */}
+        <div className="w-1/3 flex flex-col min-h-0">
+          <div className="bg-white rounded-xl shadow-lg flex flex-col h-full">
+            <div className="flex items-center justify-between p-4 border-b border-gray-100 flex-shrink-0">
+              <h2 className="text-lg font-bold text-gray-900">
+                {selectedIssue ? 'Issue Details' : `All Issues (${issues.length})`}
+              </h2>
+              {selectedIssue && (
+                <button 
+                  onClick={() => setSelectedIssue(null)}
+                  className="text-sky-600 hover:text-sky-800 text-sm font-medium"
+                >
+                  ← Back to All
+                </button>
+              )}
+            </div>
+            
+            <div className="flex-1 p-4 overflow-y-auto min-h-0">
               {selectedIssue ? (
                 <div className="space-y-4">
                   <div className="relative">
                     <img 
                       src={selectedIssue.photo} 
                       alt={selectedIssue.title}
-                      className="w-full h-48 object-cover rounded-lg"
+                      className="w-full h-32 object-cover rounded-lg"
                     />
-                    <div className={`absolute top-2 right-2 px-3 py-1 rounded-full text-sm font-medium text-white ${getStatusBgColor(selectedIssue.status)}`}>
+                    <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium text-white ${getStatusBgColor(selectedIssue.status)}`}>
                       {getStatusText(selectedIssue.status)}
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{selectedIssue.title}</h3>
-                    <p className="text-gray-600 mt-2 text-sm">{selectedIssue.description}</p>
+                    <h3 className="text-base font-semibold text-gray-900">{selectedIssue.title}</h3>
+                    <p className="text-gray-600 mt-1 text-sm">{selectedIssue.description}</p>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <div className="flex items-center text-sm">
                       <MapPin className="h-4 w-4 text-sky-600 mr-2" />
                       <span className="text-gray-700">{selectedIssue.location}</span>
@@ -439,7 +422,7 @@ const Home = () => {
                       <Calendar className="h-4 w-4 text-sky-600 mr-2" />
                       <span className="text-gray-700">{selectedIssue.date} at {selectedIssue.time}</span>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-2 gap-3 text-xs">
                       <div>
                         <span className="text-gray-500">Reported by:</span>
                         <p className="font-medium text-gray-700">{selectedIssue.reportedBy}</p>
@@ -463,183 +446,110 @@ const Home = () => {
                     </div>
                     
                     {selectedIssue.assignedWorker && (
-                      <div className="bg-orange-50 p-3 rounded-lg">
-                        <span className="text-orange-700 font-medium">Assigned Worker:</span>
-                        <p className="text-orange-600">{selectedIssue.assignedWorker}</p>
+                      <div className="bg-orange-50 p-2 rounded-lg">
+                        <span className="text-orange-700 font-medium text-sm">Assigned Worker:</span>
+                        <p className="text-orange-600 text-sm">{selectedIssue.assignedWorker}</p>
                       </div>
                     )}
 
                     {selectedIssue.status === 'resolved' && selectedIssue.resolvedBy && (
-                      <div className="bg-green-50 p-3 rounded-lg">
-                        <span className="text-green-700 font-medium">Resolved by:</span>
-                        <p className="text-green-600">{selectedIssue.resolvedBy} on {selectedIssue.resolvedDate}</p>
+                      <div className="bg-green-50 p-2 rounded-lg">
+                        <span className="text-green-700 font-medium text-sm">Resolved by:</span>
+                        <p className="text-green-600 text-sm">{selectedIssue.resolvedBy} on {selectedIssue.resolvedDate}</p>
                       </div>
                     )}
                   </div>
 
-                  <div className="border-t pt-4 space-y-3">
-                    {selectedIssue.status !== 'resolved' && (
-                      <>
-                        {/* Only show Assign Worker button for pending issues */}
+                  {selectedIssue.status !== 'resolved' && (
+                    <div className="space-y-2 pt-2 border-t">
+                      {selectedIssue.status === 'pending' && (
+                        <button 
+                          onClick={() => handleAssignWorker(selectedIssue)}
+                          className="w-full bg-sky-600 text-white px-3 py-2 rounded-lg hover:bg-sky-700 transition-colors flex items-center justify-center text-sm"
+                        >
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Assign Worker
+                        </button>
+                      )}
+
+                      <div className="flex gap-2">
                         {selectedIssue.status === 'pending' && (
                           <button 
-                            onClick={() => handleAssignWorker(selectedIssue)}
-                            className="w-full bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition-colors flex items-center justify-center"
+                            onClick={() => handleStatusUpdate(selectedIssue.id, 'in-progress')}
+                            className="flex-1 bg-orange-100 text-orange-700 px-2 py-2 rounded-lg hover:bg-orange-200 transition-colors text-xs"
                           >
-                            <UserPlus className="h-4 w-4 mr-2" />
-                            Assign Worker
+                            Mark In Progress
                           </button>
                         )}
-
-                        <div className="flex gap-2">
-                          {selectedIssue.status === 'pending' && (
-                            <button 
-                              onClick={() => handleStatusUpdate(selectedIssue.id, 'in-progress')}
-                              className="flex-1 bg-orange-100 text-orange-700 px-3 py-2 rounded-lg hover:bg-orange-200 transition-colors text-sm"
-                            >
-                              Mark In Progress
-                            </button>
-                          )}
-                          <button 
-                            onClick={() => handleStatusUpdate(selectedIssue.id, 'resolved')}
-                            className="flex-1 bg-green-100 text-green-700 px-3 py-2 rounded-lg hover:bg-green-200 transition-colors text-sm"
-                          >
-                            Mark Resolved
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
+                        <button 
+                          onClick={() => handleStatusUpdate(selectedIssue.id, 'resolved')}
+                          className="flex-1 bg-green-100 text-green-700 px-2 py-2 rounded-lg hover:bg-green-200 transition-colors text-xs"
+                        >
+                          Mark Resolved
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                <div className="space-y-2">
                   {issues.map(issue => renderIssueCard(issue))}
                 </div>
               )}
             </div>
-
-            {/* Statistics Card - Only show when not viewing individual issue */}
-            {!selectedIssue && (
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center mb-4">
-                  <BarChart3 className="h-5 w-5 text-sky-600 mr-2" />
-                  <h3 className="text-lg font-bold text-gray-900">Statistics</h3>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-r from-blue-50 to-sky-50 p-4 rounded-lg border border-blue-100">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">Total Issues</p>
-                        <p className="text-2xl font-bold text-blue-700">{todayStats.total}</p>
-                      </div>
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <BarChart3 className="h-5 w-5 text-blue-600" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-r from-red-50 to-pink-50 p-4 rounded-lg border border-red-100">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-red-600 uppercase tracking-wide">Pending</p>
-                        <p className="text-2xl font-bold text-red-700">{todayStats.pending}</p>
-                      </div>
-                      <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg border border-orange-100">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-orange-600 uppercase tracking-wide">In Progress</p>
-                        <p className="text-2xl font-bold text-orange-700">{todayStats.inProgress}</p>
-                      </div>
-                      <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                        <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-100">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-green-600 uppercase tracking-wide">Resolved</p>
-                        <p className="text-2xl font-bold text-green-700">{todayStats.resolved}</p>
-                      </div>
-                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
+        </div>
 
-          {/* Right Panel - Map View */}
-          <div className="w-2/3">
-            <div className="bg-white rounded-xl shadow-lg p-6 h-full">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">Live Issues Map</h2>
-                <div className="flex items-center space-x-4 text-sm">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                    <span>Pending ({issues.filter(i => i.status === 'pending').length})</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-orange-500 rounded-full mr-2"></div>
-                    <span>In Progress ({issues.filter(i => i.status === 'in-progress').length})</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                    <span>Resolved ({issues.filter(i => i.status === 'resolved').length})</span>
-                  </div>
+        {/* Right Panel - Map View */}
+        <div className="w-2/3 flex flex-col min-h-0">
+          <div className="bg-white rounded-xl shadow-lg flex flex-col h-full">
+            <div className="flex items-center justify-between p-4 border-b border-gray-100 flex-shrink-0">
+              <h2 className="text-lg font-bold text-gray-900">Live Issues Map</h2>
+              <div className="flex items-center space-x-4 text-xs">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                  <span>Pending ({issues.filter(i => i.status === 'pending').length})</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full mr-2"></div>
+                  <span>In Progress ({issues.filter(i => i.status === 'in-progress').length})</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                  <span>Resolved ({issues.filter(i => i.status === 'resolved').length})</span>
                 </div>
               </div>
+            </div>
 
-              {/* Location Search */}
-              <div className="mb-4">
-                <div className="flex gap-2">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sky-400 h-4 w-4" />
-                    <input
-                      type="text"
-                      placeholder="Search location on map..."
-                      value={searchLocation}
-                      onChange={(e) => setSearchLocation(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleLocationSearch()}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                    />
-                  </div>
-                  <button 
-                    onClick={handleLocationSearch}
-                    className="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition-colors"
-                  >
-                    Search
-                  </button>
+            {/* Location Search */}
+            <div className="p-4 border-b border-gray-100 flex-shrink-0">
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sky-400 h-4 w-4" />
+                  <input
+                    type="text"
+                    placeholder="Search location on map..."
+                    value={searchLocation}
+                    onChange={(e) => setSearchLocation(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleLocationSearch()}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent text-sm"
+                  />
                 </div>
+                <button 
+                  onClick={handleLocationSearch}
+                  className="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition-colors text-sm"
+                >
+                  Search
+                </button>
               </div>
+            </div>
 
-              {/* Leaflet Map Container */}
+            {/* Leaflet Map Container */}
+            <div className="flex-1 min-h-0">
               <div 
                 ref={mapRef} 
-                className="w-full h-96 rounded-lg border-2 border-gray-200"
-                style={{ minHeight: '400px' }}
+                className="w-full h-full"
               />
-
-              <div className="mt-4 text-sm text-gray-600 bg-sky-50 p-3 rounded-lg">
-                <p className="font-medium text-sky-700 mb-1">Map Instructions:</p>
-                <ul className="space-y-1 text-xs">
-                  <li>• Click on any colored marker to view issue details</li>
-                  <li>• Search for locations using the search box above</li>
-                  <li>• Hover over markers to see quick info</li>
-                  <li>• Use mouse wheel to zoom in/out</li>
-                  <li>• Drag to pan around the map</li>
-                </ul>
-              </div>
             </div>
           </div>
         </div>
@@ -647,8 +557,8 @@ const Home = () => {
 
       {/* Enhanced Assign Worker Modal */}
       {showAssignModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] flex flex-col overflow-hidden relative z-[10000]">
             {/* Modal Header */}
             <div className="bg-gradient-to-r from-sky-600 to-sky-700 px-6 py-4 flex-shrink-0">
               <div className="flex items-center justify-between">
