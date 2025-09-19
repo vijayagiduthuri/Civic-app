@@ -7,5 +7,5 @@ export const schemas = {
   users: userSchema,
   issues : issueSchema,
   technicians : technicianSchema,
-  pending_issues : pendingIssueSchema,
+  assigned : pendingIssueSchema,
 }

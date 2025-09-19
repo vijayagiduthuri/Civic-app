@@ -5,8 +5,8 @@ export const assignPendingIssue = async (req, res) => {
   try {
     const pendingData = req.body;
 
-    // Insert into pending_issues
-    const result = await insertRow("pending_issues", pendingData);
+    // Insert into assigned
+    const result = await insertRow("assigned", pendingData);
 
     if (result.success) {
       return res.status(201).json({
@@ -33,7 +33,7 @@ export const assignPendingIssue = async (req, res) => {
 // Fetch all pending issues
 export const getAllPendingIssues = async (req, res) => {
   try {
-    const result = await selectRows("pending_issues");
+    const result = await selectRows("assigned");
 
     if (result.success) {
       return res.status(200).json({

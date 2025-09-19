@@ -1,4 +1,5 @@
 import { insertRow,selectRows } from "../lib/dbService.js";
+import { supabase } from "../config/supabaseClient.js";
 
 //Function to register a technician
 export const registerTechnician = async (req, res) => {
@@ -101,8 +102,8 @@ export const getUnassignedTechnicians = async (req, res) => {
       return res.status(400).json({ message: allTechsRes.error });
     }
 
-    // 2. Fetch all technician_ids from pending_issues
-    const assignedTechsRes = await selectRows("pending_issues", {}, ["technician_id"]);
+    // 2. Fetch all technician_ids from assigned
+    const assignedTechsRes = await selectRows("assigned", {}, ["technician_id"]);
     if (!assignedTechsRes.success) {
       return res.status(400).json({ message: assignedTechsRes.error });
     }
@@ -125,3 +126,35 @@ export const getUnassignedTechnicians = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
+
+export const getResolvedIssuesByTechnician = async (req, res) => {
+  try {
+    const { technician_id } = req.body; // or req.query depending on your route setup
+
+    // Call the Supabase function
+    const { data, error } = await supabase
+      .rpc("get_resolved_issues_by_technician", { tech_id: technician_id });
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: "Failed to fetch resolved issues",
+        error: error.message
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Resolved issues fetched successfully",
+      data
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: err.message
+    });
+  }
+};
+
