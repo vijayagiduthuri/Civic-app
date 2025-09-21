@@ -23,16 +23,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="issues"
-        options={{
-          title: "Issues",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="alert" size={size} color={color} />
-          ),
-        }}
-      />
-
     </Tabs>
   );
 }

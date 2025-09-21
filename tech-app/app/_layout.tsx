@@ -1,8 +1,11 @@
 import React from "react";
-import { Slot } from "expo-router";
+import {Stack } from "expo-router";
 import './global.css';
 export default function RootLayout() {
   return (
-      <Slot />
+    <Stack>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="issueDetails/[id]" options={{ title: "Issue Details" }} />
+    </Stack>
   );
 }
