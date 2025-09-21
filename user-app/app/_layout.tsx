@@ -1,26 +1,43 @@
-import React, { useEffect, useState } from "react";
+import { getUserContactDetails } from "@/utils/userData";
 import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
-import { Slot, SplashScreen, useRouter } from "expo-router";
-import Splash from "@/components/splash";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
+import { Slot, useRouter } from "expo-router";
+import React, { useEffect } from "react";
 // Keep the splash screen visible until the root layout has decided on the initial route
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 function InitialLayout() {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoaded) {
-      if (isSignedIn) {
-    router.replace('/(tabs)');
-      } else {
-        // Redirect to the sign-in screen for unauthenticated users
-        router.replace('/(auth)/signin');
+    const checkUserStatus = async () => {
+      if (isLoaded) {
+        if (isSignedIn) {
+          // Check if user has completed contact details
+          try {
+            const contactDetails = await getUserContactDetails(user?.id);
+            if (contactDetails) {
+              // User has completed contact details, go to main app
+              router.replace('/(tabs)');
+            } else {
+              // User needs to complete contact details
+              router.replace('/contact-details');
+            }
+          } catch (error) {
+            console.error('Error checking contact details:', error);
+            // If there's an error, assume user needs to complete contact details
+            router.replace('/contact-details');
+          }
+        } else {
+          // Redirect to the sign-in screen for unauthenticated users
+          router.replace('/(auth)/signin');
+        }
       }
-      // Hide the splash screen once the initial route is determined
-    }
-  }, [isLoaded, isSignedIn]);
+    };
+
+    checkUserStatus();
+  }, [isLoaded, isSignedIn, user]);
 
   // Render a loading screen while Clerk is loading the auth state
   if (!isLoaded) {
