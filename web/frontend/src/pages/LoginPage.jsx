@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Eye, EyeOff, Shield, Building2, Lock, Mail, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Eye, EyeOff, Shield, Building2, Lock, Mail, AlertTriangle, CheckCircle, XCircle, X } from 'lucide-react';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +9,24 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [toasts, setToasts] = useState([]);
+
+  // Toast management functions
+  const addToast = (type, title, message, duration = 4000) => {
+    const id = Date.now() + Math.random();
+    const toast = { id, type, title, message, duration };
+    
+    setToasts(prev => [...prev, toast]);
+    
+    // Auto remove toast after duration
+    setTimeout(() => {
+      removeToast(id);
+    }, duration);
+  };
+
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -49,21 +67,132 @@ const LoginPage = () => {
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      
+      // Show specific toast messages for missing fields
+      const missingFields = [];
+      if (!formData.email) missingFields.push('Email');
+      if (!formData.password) missingFields.push('Password');
+      
+      if (missingFields.length === 2) {
+        addToast('error', 'Required Fields Missing', 'Email and Password are required');
+      } else if (missingFields.length === 1) {
+        addToast('error', 'Required Field Missing', `${missingFields[0]} is required`);
+      } else {
+        // For format validation errors
+        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+          addToast('error', 'Invalid Email', 'Enter a valid government email address');
+        } else if (formData.password && formData.password.length < 8) {
+          addToast('error', 'Password Too Short', 'Password must be at least 8 characters');
+        }
+      }
       return;
     }
     
     setIsLoading(true);
     setErrors({});
     
+    // Show loading toast
+    addToast('info', 'Authenticating', 'Verifying your credentials...', 2000);
+    
+    // Simulate authentication
     setTimeout(() => {
-      console.log('Login attempted with:', formData);
       setIsLoading(false);
-      alert('Login successful! Redirecting to dashboard...');
+      
+      // Simulate different outcomes based on email for demo
+      if (formData.email.includes('admin')) {
+        addToast('success', 'Login Successful', 'Welcome back! Redirecting to dashboard...', 3000);
+        setTimeout(() => {
+          console.log('Redirecting to dashboard...');
+        }, 1000);
+      } else if (formData.email.includes('invalid')) {
+        addToast('error', 'Authentication Failed', 'Invalid credentials. Please check your email and password.');
+      } else {
+        addToast('success', 'Access Granted', 'Login successful! Redirecting to portal...', 3000);
+        setTimeout(() => {
+          console.log('Redirecting to portal...');
+        }, 1000);
+      }
     }, 2500);
+  };
+
+  // Toast Component
+  const ToastContainer = () => (
+    <div className="fixed top-4 right-4 z-50 space-y-2">
+      {toasts.map(toast => (
+        <Toast key={toast.id} toast={toast} onRemove={() => removeToast(toast.id)} />
+      ))}
+    </div>
+  );
+
+  const Toast = ({ toast, onRemove }) => {
+    const [isVisible, setIsVisible] = useState(false);
+    const [isExiting, setIsExiting] = useState(false);
+
+    useEffect(() => {
+      // Trigger entrance animation
+      setTimeout(() => setIsVisible(true), 10);
+    }, []);
+
+    const handleClose = () => {
+      setIsExiting(true);
+      setTimeout(onRemove, 300);
+    };
+
+    const getToastStyles = () => {
+      const baseStyles = "flex items-start p-4 rounded-lg shadow-lg border max-w-sm transition-all duration-300 transform";
+      
+      const visibilityStyles = isVisible && !isExiting 
+        ? "translate-x-0 opacity-100" 
+        : "translate-x-full opacity-0";
+
+      switch (toast.type) {
+        case 'success':
+          return `${baseStyles} ${visibilityStyles} bg-green-50 border-green-200 text-green-800`;
+        case 'error':
+          return `${baseStyles} ${visibilityStyles} bg-red-50 border-red-200 text-red-800`;
+        case 'warning':
+          return `${baseStyles} ${visibilityStyles} bg-yellow-50 border-yellow-200 text-yellow-800`;
+        case 'info':
+        default:
+          return `${baseStyles} ${visibilityStyles} bg-blue-50 border-blue-200 text-blue-800`;
+      }
+    };
+
+    const getIcon = () => {
+      switch (toast.type) {
+        case 'success':
+          return <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />;
+        case 'error':
+          return <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />;
+        case 'warning':
+          return <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />;
+        case 'info':
+        default:
+          return <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />;
+      }
+    };
+
+    return (
+      <div className={getToastStyles()}>
+        {getIcon()}
+        <div className="ml-3 flex-1">
+          <p className="text-sm font-semibold">{toast.title}</p>
+          <p className="text-sm opacity-90">{toast.message}</p>
+        </div>
+        <button
+          onClick={handleClose}
+          className="ml-4 flex-shrink-0 text-current opacity-50 hover:opacity-100 transition-opacity"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    );
   };
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-white flex flex-col">
+      <ToastContainer />
+      
       {/* Top Banner - Fixed */}
       <div className="bg-sky-600 border-b-4 border-sky-600 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4 py-3">
@@ -204,6 +333,8 @@ const LoginPage = () => {
               </div>
             </div>
           </div>
+
+        
 
           {/* Footer Links */}
           <div className="mt-8 text-center">
