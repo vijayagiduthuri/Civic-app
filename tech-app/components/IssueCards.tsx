@@ -2,6 +2,7 @@ import { Issue } from "@/services/types";
 import { Ionicons } from "@expo/vector-icons";
 import { Text, TouchableOpacity, View } from "react-native";
 import { LinearGradient as BVLinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 
 // Active Issue Card Component
 export const ActiveIssueCard = ({ issue, onStartWork }:{issue: Issue; onStartWork: (issue:Issue) => void })=> (
@@ -46,7 +47,12 @@ export const ActiveIssueCard = ({ issue, onStartWork }:{issue: Issue; onStartWor
         </Text>
       </View>
       
-      <TouchableOpacity onPress={() => onStartWork(issue)}>
+      <TouchableOpacity
+        onPress={() =>router.push({
+      pathname: "/issueDetails/[id]",
+      params: { id: issue.id },
+    })
+  }>
         <BVLinearGradient
           colors={["#1089d3", "#12b1d1"]}
           start={{ x: 0, y: 0 }}
