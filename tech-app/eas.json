@@ -3,26 +3,20 @@
     "version": ">= 16.19.3",
     "appVersionSource": "remote"
   },
-  "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal",
-      "env": {
-        "MAPBOX_ACCESS_TOKEN": "pk.eyJ1IjoicmV2YW50aC0ybXJzIiwiYSI6ImNtZnRya3F3aTBvcTgycHF6dHF5cjQ2eDgifQ.B5dRzc0aLn--z1EqPGiR7w"
-      }
-    },
-    "preview": {
-      "distribution": "internal",
-      "env": {
-        "MAPBOX_ACCESS_TOKEN": "pk.eyJ1IjoicmV2YW50aC0ybXJzIiwiYSI6ImNtZnRya3F3aTBvcTgycHF6dHF5cjQ2eDgifQ.B5dRzc0aLn--z1EqPGiR7w"
-      }
-    },
-    "production": {
-      "autoIncrement": true,
-      "env": {
-        "MAPBOX_ACCESS_TOKEN": "pk.eyJ1IjoicmV2YW50aC0ybXJzIiwiYSI6ImNtZnRya3F3aTBvcTgycHF6dHF5cjQ2eDgifQ.B5dRzc0aLn--z1EqPGiR7w"
-      }
-    }
+"build": {
+  "development": {
+    "developmentClient": true,
+    "distribution": "internal",
+    "android": { "buildType": "apk" }
+  },
+  "preview": {
+    "distribution": "internal",
+    "android": { "buildType": "apk" }
+  },
+  "production": {
+    "autoIncrement": true,
+    "android": { "buildType": "app-bundle" }
+  } 
   },
   "submit": {
     "production": {}

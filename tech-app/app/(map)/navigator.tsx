@@ -11,13 +11,14 @@ import {
   Platform
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import Mapbox, { Camera, MarkerView } from '@rnmapbox/maps';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import Mapbox, { Camera, MarkerView} from "@rnmapbox/maps"
 import { mapService, RouteData, RouteStep, LocationCoords} from "@/services/_Mapservice";
+import { MAPBOX_ACCESS_TOKEN } from "@env";
 
 // Initialize Mapbox with error handling
 try {
-  const token = process.env.MAPBOX_ACCESS_TOKEN_DEFAULT || '';
+  const token = MAPBOX_ACCESS_TOKEN;
   console.log(token);
   if (token) {
     Mapbox.setAccessToken(token);
@@ -189,7 +190,7 @@ export default function NavigationScreen() {
           {routeData.steps.map((step: RouteStep, index: number) => (
             <View key={index} className="flex-row items-start py-2 border-b border-gray-100">
               <View className="bg-blue-100 p-2 rounded-full mr-3">
-                <Ionicons 
+                <Ionicons
                   name={getManeuverIcon(step.maneuver?.type, step.maneuver?.modifier)} 
                   size={16} 
                   color="#3B5FFD" 

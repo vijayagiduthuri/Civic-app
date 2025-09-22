@@ -1,7 +1,8 @@
-import * as Location from 'expo-location';
+import { MAPBOX_ACCESS_TOKEN } from '@env';
+import * as Location from "expo-location";
 
 // Set your Mapbox access token here
-const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN_DEFAULT;
+const MAPBOX_TOKEN = MAPBOX_ACCESS_TOKEN;
 
 export interface RouteStep {
   instruction: string;
@@ -135,4 +136,4 @@ class MapService {
 }
 
 // Create and export a singleton instance
-export const mapService = new MapService(MAPBOX_ACCESS_TOKEN||'');
+export const mapService = new MapService(MAPBOX_TOKEN||'');
