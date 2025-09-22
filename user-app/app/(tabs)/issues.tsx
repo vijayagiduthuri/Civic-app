@@ -1,14 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Alert,
     ScrollView,
-    StyleSheet,
     Text,
     TouchableOpacity,
     View,
+    Pressable,
+    ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { useUser } from "@clerk/clerk-expo";
 
 interface Issue {
   id: string;
@@ -21,333 +24,314 @@ interface Issue {
   category: string;
 }
 
-const sampleIssues: Issue[] = [
-  {
-    id: '1',
-    title: 'Broken Street Light',
-    description: 'Street light on Main Street is not working, making the area unsafe at night.',
-    location: 'Main Street, Block A',
-    status: 'open',
-    createdAt: '2 days ago',
-    supportCount: 12,
-    category: 'Infrastructure',
-  },
-  {
-    id: '2',
-    title: 'Pothole on Oak Avenue',
-    description: 'Large pothole causing damage to vehicles and creating traffic hazards.',
-    location: 'Oak Avenue, near City Hall',
-    status: 'in-progress',
-    createdAt: '1 week ago',
-    supportCount: 8,
-    category: 'Road Maintenance',
-  },
-  {
-    id: '3',
-    title: 'Garbage Collection Issue',
-    description: 'Garbage bins not being emptied on scheduled days in residential area.',
-    location: 'Residential Block B',
-    status: 'open',
-    createdAt: '3 days ago',
-    supportCount: 15,
-    category: 'Sanitation',
-  },
-];
+
+// Helper functions
+const getStatusColor = (status: 'open' | 'in-progress' | 'resolved') => {
+  const colors = {
+    'open': '#e74c3c',
+    'in-progress': '#f1c40f',
+    'resolved': '#2ecc71'
+  };
+  return colors[status] || '#95a5a6';
+};
+
+const getCategoryColor = (category: string) => {
+  const colors: Record<string, string> = {
+    'Infrastructure': '#3498db',
+    'Road Maintenance': '#9b59b6',
+    'Sanitation': '#1abc9c',
+    'Public Safety': '#e67e22'
+  };
+  return colors[category] || '#34495e';
+};
 
 export default function IssuesScreen() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [selectedIssue, setSelectedIssue] = useState<string | null>(null);
+  const router = useRouter();
+  const { user } = useUser();
+  const [loading, setLoading] = useState(true);
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const categories = ['All', 'Infrastructure', 'Road Maintenance', 'Sanitation', 'Public Safety'];
-
-  const filteredIssues = selectedCategory === 'All' 
-    ? sampleIssues 
-    : sampleIssues.filter(issue => issue.category === selectedCategory);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'open': return '#FF4444';
-      case 'in-progress': return '#FFA500';
-      case 'resolved': return '#00AA00';
-      default: return '#666666';
+  const fetchIssues = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      // Get user email and user_id
+      const email = user?.primaryEmailAddress?.emailAddress || user?.emailAddresses?.[0]?.emailAddress;
+      let userId = undefined;
+      if (email) {
+        const response = await fetch(
+          'https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/authUsers/get-user',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+          }
+        );
+        if (response.ok) {
+          const json = await response.json();
+          if (json?.success && json?.data) {
+            userId = json.data.id;
+            console.log('Fetched user ID:', userId);
+          }
+        }
+      }
+      // Fetch all issues
+      const issuesResponse = await fetch('https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/issues/all-issues', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      if (!issuesResponse.ok) {
+        throw new Error(`HTTP error! status: ${issuesResponse.status}`);
+      }
+      const issuesJson = await issuesResponse.json();
+      // Map API data to Issue[]
+      const apiIssues = (issuesJson.data || []).map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        location: '', // No location in API, leave blank
+        status: item.status === 'in_progress' ? 'in-progress' : (item.status === 'pending' ? 'open' : item.status),
+        createdAt: item.createdAt || '',
+        supportCount: item.supportCount || 0,
+        category: item.category || '',
+      }));
+      setIssues(apiIssues);
+    } catch (err) {
+      console.error('Error fetching issues:', err);
+      setError('Failed to load issues. Please try again.');
+      setIssues([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'open': return 'alert-circle';
-      case 'in-progress': return 'time';
-      case 'resolved': return 'checkmark-circle';
-      default: return 'help-circle';
-    }
+  useEffect(() => {
+    fetchIssues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  const handleIssuePress = (issueId: string) => {
+    router.push({
+      pathname: '/IssueDetails/issueDetailScreen',
+      params: { issueId },
+    });
   };
 
-  const handleSupportIssue = (issueId: string) => {
-    Alert.alert(
-      'Support Issue',
-      'Thank you for supporting this issue! Your voice matters.',
-      [{ text: 'OK' }]
-    );
+  const handleReportIssue = () => {
+    router.push('/report-issue'); // Navigate to report issue screen
   };
 
-  const handleCreateIssue = () => {
-    Alert.alert(
-      'Create New Issue',
-      'This will open the issue creation form.',
-      [{ text: 'OK' }]
-    );
+  const handleRetry = () => {
+    fetchIssues();
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
+  // Loading State
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-50">
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Community Issues</Text>
-          <TouchableOpacity style={styles.createButton} onPress={handleCreateIssue}>
-            <Ionicons name="add" size={20} color="#ffffff" />
-            <Text style={styles.createButtonText}>Report Issue</Text>
-          </TouchableOpacity>
+        <View className="bg-blue-500 pt-5 pb-4 px-5 shadow-lg">
+          <View className="flex-row items-center">
+            <TouchableOpacity 
+              onPress={() => router.back()}
+              className="p-2 mr-4"
+            >
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <Text className="text-2xl font-semibold text-white">Reported Issues</Text>
+          </View>
         </View>
 
-        {/* Category Filter */}
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoryContainer}
-          contentContainerStyle={styles.categoryContent}
-        >
-          {categories.map((category) => (
-            <TouchableOpacity
-              key={category}
-              style={[
-                styles.categoryButton,
-                selectedCategory === category && styles.categoryButtonActive
-              ]}
-              onPress={() => setSelectedCategory(category)}
-            >
-              <Text style={[
-                styles.categoryButtonText,
-                selectedCategory === category && styles.categoryButtonTextActive
-              ]}>
-                {category}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        {/* Loading Indicator */}
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#3498db" />
+          <Text className="text-gray-600 mt-4 text-lg">Loading issues...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-        {/* Issues List */}
-        <View style={styles.issuesContainer}>
-          {filteredIssues.map((issue) => (
-            <TouchableOpacity
-              key={issue.id}
-              style={[
-                styles.issueCard,
-                selectedIssue === issue.id && styles.issueCardSelected
-              ]}
-              onPress={() => setSelectedIssue(issue.id)}
+  // Error State
+  if (error && issues.length === 0) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-50">
+        {/* Header */}
+        <View className="bg-blue-500 pt-5 pb-4 px-5 shadow-lg">
+          <View className="flex-row items-center">
+            <TouchableOpacity 
+              onPress={() => router.back()}
+              className="p-2 mr-4"
             >
-              <View style={styles.issueHeader}>
-                <View style={styles.issueTitleContainer}>
-                  <Text style={styles.issueTitle}>{issue.title}</Text>
-                  <View style={[styles.statusBadge, { backgroundColor: getStatusColor(issue.status) }]}>
-                    <Ionicons 
-                      name={getStatusIcon(issue.status)} 
-                      size={12} 
-                      color="#ffffff" 
-                    />
-                    <Text style={styles.statusText}>{issue.status.toUpperCase()}</Text>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <Text className="text-2xl font-semibold text-white">Reported Issues</Text>
+          </View>
+        </View>
+
+        {/* Error Message */}
+        <View className="flex-1 justify-center items-center px-8">
+          <Ionicons name="alert-circle-outline" size={64} color="#e74c3c" />
+          <Text className="text-gray-600 text-lg text-center mt-4 mb-2">
+            {error}
+          </Text>
+          <TouchableOpacity 
+            className="bg-blue-500 px-6 py-3 rounded-lg mt-4"
+            onPress={handleRetry}
+          >
+            <Text className="text-white text-base font-semibold">Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Empty State
+  if (!loading && issues.length === 0) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-50">
+        <View className="bg-blue-500 pt-5 pb-4 px-5 shadow-lg">
+          <View className="flex-row items-center">
+            <TouchableOpacity 
+              onPress={() => router.back()}
+              className="p-2 mr-4"
+            >
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <Text className="text-2xl font-semibold text-white">Reported Issues</Text>
+          </View>
+        </View>
+
+        <View className="flex-1 justify-center items-center px-8">
+          <Ionicons name="document-text-outline" size={64} color="#bdc3c7" />
+          <Text className="text-gray-600 text-lg text-center mt-4 mb-2">
+            You haven't reported any issues yet.
+          </Text>
+          <Text className="text-gray-500 text-center mb-6">
+            Be the first to report an issue in your community.
+          </Text>
+          <TouchableOpacity 
+            className="bg-blue-500 px-6 py-3 rounded-lg"
+            onPress={handleReportIssue}
+          >
+            <Text className="text-white text-base font-semibold">Report an Issue</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50">
+      {/* Header */}
+      <View className="bg-blue-500 pt-5 pb-4 px-5 shadow-lg">
+        <View className="flex-row items-center">
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            className="p-2 mr-4"
+          >
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text className="text-2xl font-semibold text-white">Reported Issues</Text>
+        </View>
+      </View>
+
+      {/* Error Banner (if any) */}
+      {error && (
+        <View className="bg-red-100 border-l-4 border-red-500 p-4 mx-5 mt-4 rounded">
+          <View className="flex-row items-center">
+            <Ionicons name="warning-outline" size={20} color="#e74c3c" />
+            <Text className="text-red-700 ml-2 flex-1">{error}</Text>
+            <TouchableOpacity onPress={handleRetry}>
+              <Text className="text-red-700 font-semibold">Retry</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* Issues List */}
+      <ScrollView 
+        className="flex-1 px-5 py-4"
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <ScrollView refreshControl={undefined} /> // Add pull-to-refresh here if needed
+        }
+      >
+        <View className="space-y-4">
+          {issues.map((issue) => (
+            <Pressable 
+              key={issue.id}
+              onPress={() => handleIssuePress(issue.id)}
+              className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 active:opacity-90 active:scale-95"
+            >
+              {/* Status Indicator */}
+              <View className="flex-row items-start mb-3">
+                <View 
+                  className="w-2 h-2 rounded-full mr-3 mt-2"
+                  style={{ backgroundColor: getStatusColor(issue.status) }}
+                />
+                <View className="flex-1">
+                  {/* Header */}
+                  <View className="flex-row justify-between items-start mb-2">
+                    <Text className="text-lg font-semibold text-gray-800 flex-1 mr-3">
+                      {issue.title}
+                    </Text>
+                    <View 
+                      className="px-3 py-1 rounded-full"
+                      style={{ backgroundColor: getCategoryColor(issue.category) }}
+                    >
+                      <Text className="text-white text-xs font-medium">
+                        {issue.category}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Description */}
+                  <Text className="text-gray-600 text-sm leading-5 mb-3" numberOfLines={2}>
+                    {issue.description}
+                  </Text>
+
+                  {/* Footer */}
+                  <View className="flex-row justify-between items-center">
+                    <View className="flex-row items-center space-x-4">
+                      {/*
+                      <View className="flex-row items-center">
+                        <Ionicons name="location-outline" size={14} color="#95a5a6" />
+                        <Text className="text-gray-500 text-xs ml-1">
+                          {issue.location}
+                        </Text>
+                      </View>
+                      */}
+                      <View className="flex-row items-center">
+                        <Ionicons name="time-outline" size={14} color="#95a5a6" />
+                        <Text className="text-gray-500 text-xs ml-1">
+                          {issue.createdAt}
+                        </Text>
+                      </View>
+                    </View>
+                    
+                    <View className="flex-row items-center bg-gray-50 px-3 py-1 rounded-full">
+                      <Ionicons name="people-outline" size={14} color="#7f8c8d" />
+                      <Text className="text-gray-600 text-xs ml-1">
+                        {issue.supportCount} supports
+                      </Text>
+                    </View>
                   </View>
                 </View>
-                <Text style={styles.issueCategory}>{issue.category}</Text>
               </View>
-
-              <Text style={styles.issueDescription} numberOfLines={2}>
-                {issue.description}
-              </Text>
-
-              <View style={styles.issueFooter}>
-                <View style={styles.issueMeta}>
-                  <Ionicons name="location" size={14} color="#666666" />
-                  <Text style={styles.issueLocation}>{issue.location}</Text>
-                </View>
-                <Text style={styles.issueDate}>{issue.createdAt}</Text>
-              </View>
-
-              <View style={styles.issueActions}>
-                <TouchableOpacity 
-                  style={styles.supportButton}
-                  onPress={() => handleSupportIssue(issue.id)}
-                >
-                  <Ionicons name="thumbs-up" size={16} color="#007AFF" />
-                  <Text style={styles.supportButtonText}>Support ({issue.supportCount})</Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
       </ScrollView>
+
+      {/* FAB Button */}
+      <TouchableOpacity 
+        className="absolute bottom-6 right-6 bg-blue-500 w-14 h-14 rounded-full items-center justify-center shadow-xl"
+        onPress={handleReportIssue}
+      >
+        <Ionicons name="add" size={24} color="#fff" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000000',
-  },
-  createButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  createButtonText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  categoryContainer: {
-    marginBottom: 20,
-  },
-  categoryContent: {
-    paddingHorizontal: 20,
-  },
-  categoryButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#f8f9fa',
-    marginRight: 12,
-  },
-  categoryButtonActive: {
-    backgroundColor: '#007AFF',
-  },
-  categoryButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#666666',
-  },
-  categoryButtonTextActive: {
-    color: '#ffffff',
-  },
-  issuesContainer: {
-    paddingHorizontal: 20,
-  },
-  issueCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#e9ecef',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  issueCardSelected: {
-    borderColor: '#007AFF',
-    borderWidth: 2,
-  },
-  issueHeader: {
-    marginBottom: 8,
-  },
-  issueTitleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  issueTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    flex: 1,
-    marginRight: 8,
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    color: '#ffffff',
-    fontSize: 10,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  issueCategory: {
-    fontSize: 12,
-    color: '#666666',
-    fontWeight: '500',
-  },
-  issueDescription: {
-    fontSize: 14,
-    color: '#333333',
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  issueFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  issueMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  issueLocation: {
-    fontSize: 12,
-    color: '#666666',
-    marginLeft: 4,
-  },
-  issueDate: {
-    fontSize: 12,
-    color: '#666666',
-  },
-  issueActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  supportButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#f0f8ff',
-    borderRadius: 16,
-  },
-  supportButtonText: {
-    fontSize: 12,
-    color: '#007AFF',
-    fontWeight: '500',
-    marginLeft: 4,
-  },
-});

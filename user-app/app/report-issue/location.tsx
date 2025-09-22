@@ -1,9 +1,13 @@
 import { ContactDetails, getUserContactDetails } from "@/utils/userData";
-import { useAuth } from "@clerk/clerk-expo";
+import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { readAsStringAsync } from 'expo-file-system/legacy';
+import * as Location from 'expo-location';
+import MapView, { Marker } from 'react-native-maps';
+import { SafeAreaView } from 'react-native-safe-area-context';
 // import MapView, { Marker } from "react-native-maps";
 // import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -14,12 +18,23 @@ export default function ReportIssueLocation() {
     description: string;
     image: string;
   }>();
-  const { user } = useAuth();
+  const { user } = useUser();
   const { title, description, image } = params;
-  const [location, setLocation] = useState<any>(null);
+  const [location, setLocation] = useState<{latitude: number; longitude: number} | null>(null);
   const [address, setAddress] = useState("");
   const [error, setError] = useState("");
   const [contactDetails, setContactDetails] = useState<ContactDetails | null>(null);
+  const [mapRegion, setMapRegion] = useState({
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
+  const [latitide , setLatitide] = useState()
+  const [selectedLocation, setSelectedLocation] = useState<{latitude: number; longitude: number} | null>(null);
+  const [isMapLoading, setIsMapLoading] = useState(true);
+const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+
 
   const loadUserData = useCallback(async () => {
     try {
@@ -34,28 +49,181 @@ export default function ReportIssueLocation() {
     loadUserData();
   }, [loadUserData]);
 
-  const handleLocationSelect = () => {
-    // For demo purposes, we'll use a mock location
-    const mockLocation = {
-      latitude: 37.78825,
-      longitude: -122.4324
-    };
-    setLocation(mockLocation);
-    setAddress("123 Main Street, San Francisco, CA 94102");
-    setError(""); // Clear any previous errors
-  };
 
-  const handleReportIssue = () => {
-    if (!title || !description || !image || !location) {
-      setError("Please fill all fields and select a location.");
+const handleLocationSelect = async () => {
+  try {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      setError('Permission to access location was denied');
       return;
     }
-    setError("");
-    // Submit logic here
-    alert("Issue reported successfully!");
-    router.replace("/(tabs)"); // Go to Home tab
-  };
 
+    let currentLocation = await Location.getCurrentPositionAsync({});
+    const newRegion = {
+      latitude: currentLocation.coords.latitude,
+      longitude: currentLocation.coords.longitude,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+    };
+    
+    // Set all location states properly
+    setMapRegion(newRegion);
+    setSelectedLocation(newRegion);
+    setLocation(newRegion); // This sets the main location state with coordinates
+    
+    // Get address from coordinates
+    let geocode = await Location.reverseGeocodeAsync(newRegion);
+    if (geocode.length > 0) {
+      const addr = geocode[0];
+      setAddress(`${addr.street || ''} ${addr.city || ''} ${addr.region || ''} ${addr.postalCode || ''}`.trim());
+    }
+    setError("");
+  } catch (error) {
+    setError("Error getting location");
+    console.error(error);
+  }
+};
+
+
+const handleMapPress = (event: any) => {
+  const { coordinate } = event.nativeEvent;
+  setSelectedLocation(coordinate);
+  setLocation(coordinate); // This sets the main location state
+  
+  // Reverse geocode the selected location
+  Location.reverseGeocodeAsync(coordinate).then(geocode => {
+    if (geocode.length > 0) {
+      const addr = geocode[0];
+      setAddress(`${addr.street || ''} ${addr.city || ''} ${addr.region || ''} ${addr.postalCode || ''}`.trim());
+    }
+  });
+};
+useEffect(() => {
+  // Simulate map loading
+  const timer = setTimeout(() => {
+    setIsMapLoading(false);
+  }, 1000);
+
+  return () => clearTimeout(timer);
+}, []);
+
+const handleReportIssue = async () => {
+  if (!title || !description || !image || !selectedLocation) {
+    setError("Please fill all fields and select a location on the map.");
+    return;
+  }
+
+  try {
+    // 0. Get user email and fetch user id from backend
+    const email = user?.primaryEmailAddress?.emailAddress || user?.emailAddresses?.[0]?.emailAddress;
+    console.log(email)
+    let userId = undefined;
+    if (email) {
+      const response = await fetch(
+        'https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/authUsers/get-user',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
+      if (response.ok) {
+        const json = await response.json();
+        if (json?.success && json?.data) {
+          userId = json.data.id;
+          console.log("Fetched User ID:", userId);
+        }
+      }
+    }
+
+    // Convert image URI to base64 if needed
+    let imageBase64 = image;
+    if (image && !image.startsWith('data:image')) {
+      try {
+        const base64 = await readAsStringAsync(image, { encoding: 'base64' });
+        imageBase64 = base64;
+      } catch (fsError) {
+        let errorMsg = 'Failed to convert image to base64.';
+        if (fsError instanceof Error) {
+          errorMsg += ' ' + fsError.message;
+        }
+        setError(errorMsg);
+        return;
+      }
+    }
+
+    // 1. Upload image
+    const uploadResponse = await fetch("https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/issues/upload-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageBase64 }),
+    });
+
+    // Check response type before parsing
+    const uploadText = await uploadResponse.text();
+    let uploadData;
+    try {
+      uploadData = JSON.parse(uploadText);
+    } catch (e) {
+      setError("Image upload failed: Server did not return JSON. Response: " + uploadText.slice(0, 100));
+      return;
+    }
+
+    if (!uploadData.success) {
+      setError("Image upload failed");
+      return;
+    }
+
+    console.log("Uploaded Image URL:", uploadData.imageUrl);
+
+    // 2. Now send issue data with uploaded image URL
+    if (!userId) {
+      setError("Failed to fetch user ID. Cannot submit issue.");
+      return;
+    }
+    const issueData = {
+      title,
+      description,
+      image_url: uploadData.imageUrl, // use public URL instead of base64
+      latitude: selectedLocation.latitude,
+      longitude: selectedLocation.longitude,
+      user_id: userId,
+    };
+
+    // FIXED ENDPOINT TYPO
+    const issueResponse = await fetch("https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/issues/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(issueData),
+    });
+
+    // Check response type before parsing
+    const issueText = await issueResponse.text();
+    let issueResult;
+    try {
+      issueResult = JSON.parse(issueText);
+    } catch (e) {
+      setError("Issue upload failed: Server did not return JSON. Response: " + issueText.slice(0, 100));
+      return;
+    }
+    console.log("Issue API response:", issueResult);
+
+    setError("");
+    setShowSuccessPopup(true);
+
+    // Redirect after success
+    setTimeout(() => {
+      setShowSuccessPopup(false);
+      router.replace("/(tabs)");
+    }, 2000);
+
+  } catch (error) {
+    setError("Failed to report issue");
+    console.error(error);
+  }
+};
   return (
     <View className="flex-1 bg-white">
       <View className="pt-2" />
@@ -75,15 +243,33 @@ export default function ReportIssueLocation() {
           </View>
         ) : null}
         <View>
-          <Text className="text-base font-semibold mb-2">Select Location</Text>
+          <Text className="text-base font-semibold mb-2">Select Location on Map</Text>
           <TouchableOpacity
-            className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl px-4 py-8 items-center justify-center"
+            className="bg-blue-500 py-3 rounded-lg mb-3"
             onPress={handleLocationSelect}
           >
-            <Ionicons name="location" size={32} color="#666" />
-            <Text className="text-gray-600 font-medium mt-2">Tap to select location</Text>
-            <Text className="text-gray-400 text-sm mt-1">Current location will be used</Text>
+            <Text className="text-white text-center font-medium">Use Current Location</Text>
           </TouchableOpacity>
+          
+          <View className="border border-gray-300 rounded-xl overflow-hidden" style={{ height: 200 }}>
+            {isMapLoading ? (
+              <View className="flex-1 bg-gray-100 items-center justify-center">
+                <Text className="text-gray-500">Loading map...</Text>
+              </View>
+            ) : (
+              <MapView
+                style={{ flex: 1 }}
+                region={mapRegion}
+                onPress={handleMapPress}
+                showsUserLocation={true}
+                onMapReady={() => setIsMapLoading(false)}
+              >
+                {selectedLocation && (
+                  <Marker coordinate={selectedLocation} />
+                )}
+              </MapView>
+            )}
+          </View>
         </View>
         <View>
           <Text className="text-base font-semibold mb-2">Location:</Text>
@@ -107,6 +293,17 @@ export default function ReportIssueLocation() {
         </TouchableOpacity>
       </View>
       </ScrollView>
+      {/* Success Popup */}
+        {showSuccessPopup && (
+          <View className="absolute inset-0 bg-gray-50 bg-opacity-40 justify-center items-center z-50">
+            <View className="bg-white rounded-xl p-6 mx-4 items-center shadow-lg">
+              <Ionicons name="checkmark-circle" size={64} color="#10B981" />
+              <Text className="text-xl font-bold mt-3 text-gray-800">Reported Successfully!</Text>
+              <Text className="text-gray-600 mt-1 text-center">Your issue has been reported and will be reviewed shortly.</Text>
+              <Text className="text-gray-500 mt-2 text-sm">Redirecting to home...</Text>
+            </View>
+          </View>
+        )}
     </View>
   );
 }

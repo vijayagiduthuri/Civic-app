@@ -5,34 +5,36 @@ import {
   dropRowById,
   updateRowById,
 } from "../lib/dbService.js";
+import { supabase } from "../config/supabaseClient.js";
+import { decode as b64Decode } from "base64-arraybuffer";
 
 // Create Issue
-export const createIssue = async (req, res) => {
-  try {
-    const issueData = req.body;
+  export const createIssue = async (req, res) => {
+    try {
+      const issueData = req.body;
 
-    const result = await insertRow("issues", issueData);
+      const result = await insertRow("issues", issueData);
 
-    if (result.success) {
-      return res.status(201).json({
-        success: true,
-        message: "Issue created successfully",
-        data: result.data,
-      });
-    } else {
-      return res.status(400).json({
+      if (result.success) {
+        return res.status(201).json({
+          success: true,
+          message: "Issue created successfully",
+          data: result.data,
+        });
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: result.error,
+        });
+      }
+    } catch (err) {
+      return res.status(500).json({
         success: false,
-        message: result.error,
+        message: "Internal server error",
+        error: err.message,
       });
     }
-  } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: err.message,
-    });
-  }
-};
+  };
 
 // Get All Issues
 export const getAllIssues = async (req, res) => {
@@ -349,6 +351,7 @@ export const updateIssueStatus = async (req, res) => {
   }
 };
 
+
 //fetch the issues where department matches the admin's department
 export const getIssuesByAdminEmail = async (req, res) => {
   try {
@@ -400,6 +403,53 @@ export const getIssuesByAdminEmail = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server error",
+=======
+// controllers/uploadController.js
+
+
+export const uploadImage = async (req, res) => {
+  try {
+    const { imageBase64 } = req.body;
+
+    if (!imageBase64) {
+      return res.status(400).json({
+        success: false,
+        message: "No image provided",
+      });
+    }
+
+    // Unique filename
+    const fileName = `issues/${Date.now()}.jpg`;
+
+    // Upload to Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from("issues") // bucket name
+      .upload(fileName, b64Decode(imageBase64), { contentType: "image/jpeg" });
+
+    if (uploadError) {
+      console.error(uploadError);
+      return res.status(500).json({
+        success: false,
+        message: "Image upload failed",
+      });
+    }
+
+    // Get public URL
+    const { data: publicData } = supabase.storage
+      .from("issues")
+      .getPublicUrl(fileName);
+
+    return res.status(201).json({
+      success: true,
+      message: "Image uploaded successfully",
+      imageUrl: publicData.publicUrl,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: err.message,
+
     });
   }
 };
