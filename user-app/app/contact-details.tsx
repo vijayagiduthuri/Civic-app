@@ -1,7 +1,7 @@
-import { useAuth } from '@clerk/clerk-expo';
+import { useAuth, useUser } from '@clerk/clerk-expo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
     Alert,
     KeyboardAvoidingView,
@@ -21,7 +21,15 @@ export default function ContactDetails() {
   const [age, setAge] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useUser();
+  const params = useLocalSearchParams();
+
+  useEffect(() => {
+    const prefillEmail = String(params?.email || '') || user?.emailAddresses?.[0]?.emailAddress || '';
+    if (prefillEmail && !email) {
+      setEmail(prefillEmail);
+    }
+  }, [params?.email, user?.id]);
 
   const validateForm = () => {
     if (!name.trim()) {
@@ -60,6 +68,28 @@ export default function ContactDetails() {
 
     setIsLoading(true);
     try {
+      // Register user on backend first
+      const registerResponse = await fetch('https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/authUsers/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          age: parseInt(age),
+        }),
+      });
+
+      if (!registerResponse.ok) {
+        throw new Error('Registration request failed');
+      }
+
+      const registerJson = await registerResponse.json();
+      if (!registerJson?.success) {
+        throw new Error(registerJson?.message || 'Registration failed');
+      }
+
       // Store contact details in AsyncStorage
       const contactDetails = {
         name: name.trim(),
