@@ -6,6 +6,7 @@ import Issues from './pages/Issues';
 import Home from './pages/Home';
 import LandingPage from './pages/LandingPage';
 import Workers from './pages/Workers';
+import Overview from './pages/Overview';
 
 
 
@@ -19,6 +20,7 @@ function App() {
     <Route path="/home" element={<Home/>}/>
     <Route path="/" element={<LandingPage/>}/>
     <Route path="/workers" element={<Workers/>}/>
+    <Route path="/overview" element={<Overview/>}/>
    </Routes>
   )
 }

@@ -100,16 +100,16 @@ const LoginPage = () => {
       
       // Simulate different outcomes based on email for demo
       if (formData.email.includes('admin')) {
-        addToast('success', 'Login Successful', 'Welcome back! Redirecting to dashboard...', 3000);
+        addToast('success', 'Login Successful', 'Welcome back! Redirecting to home page...', 3000);
         setTimeout(() => {
-          console.log('Redirecting to dashboard...');
+          window.location.href = '/home'; // Redirect to home page
         }, 1000);
       } else if (formData.email.includes('invalid')) {
         addToast('error', 'Authentication Failed', 'Invalid credentials. Please check your email and password.');
       } else {
-        addToast('success', 'Access Granted', 'Login successful! Redirecting to portal...', 3000);
+        addToast('success', 'Access Granted', 'Login successful! Redirecting to home page...', 3000);
         setTimeout(() => {
-          console.log('Redirecting to portal...');
+          window.location.href = '/home'; // Redirect to home page
         }, 1000);
       }
     }, 2500);

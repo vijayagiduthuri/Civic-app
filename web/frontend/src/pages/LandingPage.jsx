@@ -2,7 +2,13 @@ import React from 'react';
 import { Building2, LogIn } from 'lucide-react';
 
 const LandingPage = () => {
-  const scrollingText = "आधिकारिक नागरिक समस्या प्रबंधन पोर्टल में आपका स्वागत है • नगरपालिका समस्याओं की रिपोर्ट करें और ट्रैक करें • मिलकर बेहतर समुदाय बनाएं • शहरी विकास के लिए आपकी आवाज महत्वपूर्ण है • ";
+  const scrollingTexts = {
+    hindi: "आधिकारिक नागरिक समस्या प्रबंधन पोर्टल में आपका स्वागत है • नगरपालिका समस्याओं की रिपोर्ट करें और ट्रैक करें • मिलकर बेहतर समुदाय बनाएं • शहरी विकास के लिए आपकी आवाज महत्वपूर्ण है • ",
+    english: "Welcome to the Official Civic Issues Management Portal • Report and Track Municipal Problems • Build Better Communities Together • Your Voice Matters for Urban Development • ",
+    telugu: "అధికారిక పౌర సమస్యల నిర్వహణ పోర్టల్‌కు స్వాగతం • మునిసిపల్ సమస్యలను రిపోర్ట్ చేసి ట్రాక్ చేయండి • కలిసి మెరుగైన కమ్యూనిటీలను నిర్మించండి • పట్టణ అభివృద్ధికి మీ స్వరం ముఖ్యం • "
+  };
+
+  const combinedScrollingText = scrollingTexts.hindi + scrollingTexts.english + scrollingTexts.telugu;
 
   const handleLoginRedirect = () => {
     // Redirect to your login page
@@ -48,7 +54,7 @@ const LandingPage = () => {
         <div className="bg-sky-700 py-2 overflow-hidden">
           <div className="animate-scroll whitespace-nowrap">
             <span className="text-white text-sm font-medium">
-              {scrollingText.repeat(3)}
+              {combinedScrollingText.repeat(5)}
             </span>
           </div>
         </div>
@@ -78,7 +84,7 @@ const LandingPage = () => {
           }
         }
         .animate-scroll {
-          animation: scroll 30s linear infinite;
+          animation: scroll 25s linear infinite;
         }
       `}</style>
     </div>
