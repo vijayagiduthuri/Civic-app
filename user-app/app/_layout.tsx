@@ -4,7 +4,7 @@ import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import { Slot, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 // Keep the splash screen visible until the root layout has decided on the initial route
-const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLICABLE_KEY||'';
+const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 function InitialLayout() {
   const { isLoaded, isSignedIn, user } = useUser();

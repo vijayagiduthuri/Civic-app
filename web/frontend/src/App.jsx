@@ -5,7 +5,6 @@ import LoginPage from './pages/LoginPage';
 import Issues from './pages/Issues';
 import Home from './pages/Home';
 import LandingPage from './pages/LandingPage';
-import Workers from './pages/Workers';
 
 
 
@@ -18,7 +17,6 @@ function App() {
     <Route path="issues" element={<Issues/>}/>
     <Route path="/home" element={<Home/>}/>
     <Route path="/" element={<LandingPage/>}/>
-    <Route path="/workers" element={<Workers/>}/>
    </Routes>
   )
 }
