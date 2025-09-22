@@ -220,18 +220,18 @@ const Home = () => {
     }
   };
 
-  const getStatusBgColor = (status) => {
-    const convertedStatus = typeof status === 'string' && ['Open', 'In Progress', 'Resolved'].includes(status)
-      ? convertStatusFromIssuesPage(status)
-      : status;
+  // const getStatusBgColor = (status) => {
+  //   const convertedStatus = typeof status === 'string' && ['Open', 'In Progress', 'Resolved'].includes(status)
+  //     ? convertStatusFromIssuesPage(status)
+  //     : status;
     
-    switch (convertedStatus) {
-      case 'pending': return 'bg-red-500';
-      case 'in-progress': return 'bg-orange-500';
-      case 'resolved': return 'bg-green-500';
-      default: return 'bg-gray-500';
-    }
-  };
+  //   switch (convertedStatus) {
+  //     case 'pending': return 'bg-red-500';
+  //     case 'in-progress': return 'bg-orange-500';
+  //     case 'resolved': return 'bg-green-500';
+  //     default: return 'bg-gray-500';
+  //   }
+  // };
 
   const getPriorityColor = (priority) => {
     switch (priority) {

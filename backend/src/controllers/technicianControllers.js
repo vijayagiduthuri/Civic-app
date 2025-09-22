@@ -248,3 +248,40 @@ export const getUnassignedTechniciansByAdmin = async (req, res) => {
   }
 };
 
+// Get all technicians by admin's department (assigned + unassigned)
+export const getAllTechniciansByAdminDepartment = async (req, res) => {
+  try {
+    const { email } = req.body; // admin email
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Admin email is required" });
+    }
+
+    // Fetch admin's department
+    const adminRes = await selectRows("admin_logins", { email });
+    if (!adminRes.success || adminRes.data.length === 0) {
+      return res.status(404).json({ success: false, message: "Admin not found" });
+    }
+    const adminDepartment = adminRes.data[0].department;
+
+    // Fetch all technicians in that department
+    const techsRes = await selectRows("technicians", { department: adminDepartment });
+    if (!techsRes.success) {
+      return res.status(400).json({ success: false, message: techsRes.error });
+    }
+
+    if (techsRes.data.length === 0) {
+      return res.status(404).json({ success: false, message: `No technicians found in ${adminDepartment}` });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `All technicians in ${adminDepartment} fetched successfully`,
+      data: techsRes.data,
+    });
+  } catch (err) {
+    console.error("Error fetching technicians by admin department:", err);
+    return res.status(500).json({ success: false, message: "Internal server error", error: err.message });
+  }
+};
+

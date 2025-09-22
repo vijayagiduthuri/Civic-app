@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Shield, Building2, Lock, Mail, AlertTriangle, CheckCircle, XCircle, X } from 'lucide-react';
+ import axios from "axios"; 
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -61,59 +62,70 @@ const LoginPage = () => {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    const newErrors = validateForm();
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      
-      // Show specific toast messages for missing fields
-      const missingFields = [];
-      if (!formData.email) missingFields.push('Email');
-      if (!formData.password) missingFields.push('Password');
-      
-      if (missingFields.length === 2) {
-        addToast('error', 'Required Fields Missing', 'Email and Password are required');
-      } else if (missingFields.length === 1) {
-        addToast('error', 'Required Field Missing', `${missingFields[0]} is required`);
-      } else {
-        // For format validation errors
-        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-          addToast('error', 'Invalid Email', 'Enter a valid government email address');
-        } else if (formData.password && formData.password.length < 8) {
-          addToast('error', 'Password Too Short', 'Password must be at least 8 characters');
-        }
-      }
-      return;
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const newErrors = validateForm();
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+
+    if (!formData.email && !formData.password) {
+      addToast('error', 'Required Fields Missing', 'Email and Password are required');
+    } else if (!formData.email) {
+      addToast('error', 'Required Field Missing', 'Email is required');
+    } else if (!formData.password) {
+      addToast('error', 'Required Field Missing', 'Password is required');
+    } else if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+      addToast('error', 'Invalid Email', 'Enter a valid government email address');
+    } else if (formData.password && formData.password.length < 8) {
+      addToast('error', 'Password Too Short', 'Password must be at least 8 characters');
     }
-    
-    setIsLoading(true);
-    setErrors({});
-    
-    // Show loading toast
-    addToast('info', 'Authenticating', 'Verifying your credentials...', 2000);
-    
-    // Simulate authentication
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      // Simulate different outcomes based on email for demo
-      if (formData.email.includes('admin')) {
-        addToast('success', 'Login Successful', 'Welcome back! Redirecting to home page...', 3000);
-        setTimeout(() => {
-          window.location.href = '/home'; // Redirect to home page
-        }, 1000);
-      } else if (formData.email.includes('invalid')) {
-        addToast('error', 'Authentication Failed', 'Invalid credentials. Please check your email and password.');
-      } else {
-        addToast('success', 'Access Granted', 'Login successful! Redirecting to home page...', 3000);
-        setTimeout(() => {
-          window.location.href = '/home'; // Redirect to home page
-        }, 1000);
+    return;
+  }
+
+  setIsLoading(true);
+  setErrors({});
+  addToast('info', 'Authenticating', 'Verifying your credentials...', 1000);
+
+  try {
+    const response = await axios.post(
+      "http://localhost:9000/api/admin/login",
+      formData,
+      {
+        headers: { "Content-Type": "application/json" },
       }
-    }, 2500);
-  };
+    );
+
+    setIsLoading(false);
+
+    if (response.data.success) {
+      addToast('success', 'Login Successful', 'Welcome back! Redirecting...', 1000);
+
+      // If you later add JWT, you can save it like this:
+      // localStorage.setItem("token", response.data.token);
+      sessionStorage.setItem("adminEmail", formData.email);
+
+      setTimeout(() => {
+        window.location.href = "/home";
+      }, 1000);
+    } else {
+      addToast('error', 'Authentication Failed', response.data.message || 'Invalid credentials');
+    }
+  } catch (err) {
+    setIsLoading(false);
+    console.error("Login error:", err);
+
+    if (err.response) {
+      // Server responded with error status
+      addToast('error', 'Login Failed', err.response.data.message || 'Invalid credentials');
+    } else {
+      // Network or other error
+      addToast('error', 'Server Error', 'Unable to connect to the server');
+    }
+  }
+};
+
 
   // Toast Component
   const ToastContainer = () => (

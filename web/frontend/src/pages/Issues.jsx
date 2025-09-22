@@ -558,14 +558,14 @@ export default function Issues() {
                           <UserCheck className="h-4 w-4 mr-1" />
                           Assign
                         </Button>
-                        <Button
+                        {/* <Button
                           size="sm"
                           onClick={() => handleStatusUpdate(issue)}
                           className="bg-sky-600 text-white hover:bg-sky-700"
                         >
                           <CheckCircle className="h-4 w-4 mr-1" />
                           Update
-                        </Button>
+                        </Button> */}
                       </div>
                     </div>
                   </div>

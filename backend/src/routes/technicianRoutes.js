@@ -5,7 +5,9 @@ import {
   getTechniciansByDepartment,
   getUnassignedTechnicians,
   getResolvedIssuesByTechnician,
-  technicianTriggerHandler,getUnassignedTechniciansByAdmin
+  technicianTriggerHandler,
+  getUnassignedTechniciansByAdmin,
+  getAllTechniciansByAdminDepartment,
 } from "../controllers/technicianControllers.js";
 
 const router = express.Router();
@@ -22,6 +24,14 @@ router.get("/issues-solved-technician", getResolvedIssuesByTechnician);
 
 router.post("/api/technician-trigger", technicianTriggerHandler);
 
-router.post('/unassigned-technicians-by-department', getUnassignedTechniciansByAdmin);
+router.post(
+  "/unassigned-technicians-by-department",
+  getUnassignedTechniciansByAdmin
+);
+
+router.post(
+  "/all-technicians-by-department",
+  getAllTechniciansByAdminDepartment
+);
 
 export default router;
