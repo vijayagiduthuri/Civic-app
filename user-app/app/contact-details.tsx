@@ -21,15 +21,22 @@ export default function ContactDetails() {
   const [age, setAge] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const params = useLocalSearchParams();
 
   useEffect(() => {
-    const prefillEmail = String(params?.email || '') || user?.emailAddresses?.[0]?.emailAddress || '';
-    if (prefillEmail && !email) {
-      setEmail(prefillEmail);
+    if (!isLoaded) return;
+
+    const rawParamEmail = (params as Record<string, unknown>)?.email as string | string[] | undefined;
+    const paramEmail = Array.isArray(rawParamEmail) ? rawParamEmail[0] : rawParamEmail;
+
+    const clerkEmail = user?.primaryEmailAddress?.emailAddress || user?.emailAddresses?.[0]?.emailAddress || '';
+    const candidate = (paramEmail && paramEmail.trim()) || clerkEmail;
+
+    if (candidate && candidate !== email) {
+      setEmail(candidate);
     }
-  }, [params?.email, user?.id]);
+  }, [isLoaded, params, user?.primaryEmailAddress?.emailAddress, user?.emailAddresses, email]);
 
   const validateForm = () => {
     if (!name.trim()) {
@@ -68,26 +75,30 @@ export default function ContactDetails() {
 
     setIsLoading(true);
     try {
-      // Register user on backend first
-      const registerResponse = await fetch('https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/authUsers/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          age: parseInt(age),
-        }),
-      });
+      // Try to register user on backend (non-blocking)
+      try {
+        const registerResponse = await fetch('https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/authUsers/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: name.trim(),
+            email: email.trim(),
+            age: parseInt(age),
+          }),
+        });
 
-      if (!registerResponse.ok) {
-        throw new Error('Registration request failed');
-      }
-
-      const registerJson = await registerResponse.json();
-      if (!registerJson?.success) {
-        throw new Error(registerJson?.message || 'Registration failed');
+        if (registerResponse.ok) {
+          const registerJson = await registerResponse.json();
+          if (!registerJson?.success) {
+            console.warn('Registration failed on backend, continuing locally');
+          }
+        } else {
+          console.warn('Registration request failed, continuing locally');
+        }
+      } catch (e) {
+        console.warn('Registration error, continuing locally:', e);
       }
 
       // Store contact details in AsyncStorage
@@ -189,6 +200,8 @@ export default function ContactDetails() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                editable={false}
+                selectTextOnFocus={false}
               />
             </View>
 
