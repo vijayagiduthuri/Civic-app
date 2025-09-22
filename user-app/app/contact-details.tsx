@@ -85,6 +85,7 @@ export default function ContactDetails() {
           body: JSON.stringify({
             name: name.trim(),
             email: email.trim(),
+            phone: phone.trim(),
             age: parseInt(age),
           }),
         });
