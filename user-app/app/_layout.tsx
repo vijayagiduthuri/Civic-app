@@ -4,7 +4,7 @@ import { Slot, SplashScreen, useRouter } from "expo-router";
 import Splash from "@/components/splash";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
 // Keep the splash screen visible until the root layout has decided on the initial route
-const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLICABLE_KEY||'';
 
 function InitialLayout() {
   const { isLoaded, isSignedIn } = useAuth();
