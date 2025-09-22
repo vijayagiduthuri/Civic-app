@@ -26,7 +26,7 @@ const issueDetailsData = {
     reportedDate: '20-09-2025',
     resolvedDate: '21-09-2025',
     status: 'resolved' as const,
-    category: 'Sanitation',
+    department: 'Sanitation',
     issueImage: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400',
     resolutionImage: 'https://images.unsplash.com/photo-1587339278754-94c1effa3a0c?w=400',
     technician: {
@@ -42,7 +42,7 @@ const issueDetailsData = {
     reportedDate: '22-09-2025',
     resolvedDate: null,
     status: 'in-progress' as const,
-    category: 'Infrastructure',
+    department: 'Infrastructure',
     issueImage: 'https://images.unsplash.com/photo-1517400508447-f8dd5184b6f2?w=400',
     resolutionImage: null,
     technician: {
@@ -58,7 +58,7 @@ const issueDetailsData = {
     reportedDate: '11-12-2024',
     resolvedDate: null,
     status: 'pending' as const,
-    category: 'Road Maintenance',
+    department: 'Road Maintenance',
     issueImage: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=400',
     resolutionImage: null,
     technician: null
@@ -233,7 +233,7 @@ export default function IssueDetailScreen() {
           )}
           <View style={styles.infoRow}>
             <Ionicons name="grid" size={18} color="#666" />
-            <Text style={styles.infoText}>Category: {issue.category}</Text>
+            <Text style={styles.infoText}>Department: {issue.department}</Text>
           </View>
         </View>
 
