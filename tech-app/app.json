@@ -1,14 +1,19 @@
 {
   "expo": {
     "name": "Tech-app",
-    "slug": "user-app",
+    "slug": "tech-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/appicon.png",
-    "scheme": "userapp",
+    "scheme": "techapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "We need your location to provide navigation to the issue location.",
+        "MGLMapboxAccessToken": "pk.eyJ1IjoicmV2YW50aC0ybXJzIiwiYSI6ImNtZnRya3F3aTBvcTgycHF6dHF5cjQ2eDgifQ.B5dRzc0aLn--z1EqPGiR7wae3RBHvVgJN1igThubNxwA",
+        "UIBackgroundModes": ["location"]
+      },
       "supportsTablet": true
     },
     "android": {
@@ -19,7 +24,12 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
+      "package": "com.anonymous.techapp"
     },
     "web": {
       "output": "static",
@@ -39,11 +49,25 @@
           }
         }
       ],
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsDownloadToken": "pk.eyJ1IjoicmV2YW50aC0ybXJzIiwiYSI6ImNtZnRya3F3aTBvcTgycHF6dHF5cjQ2eDgifQ.B5dRzc0aLn--z1EqPGiR7w",
+          "RNMapboxMapsVersion": "11.0.0"
+        }
+      ],
       "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e28f67bf-62a0-41a7-bed2-dcf45d88c271"
+      }
+    },
+    "owner": "rtx_29"
   }
 }

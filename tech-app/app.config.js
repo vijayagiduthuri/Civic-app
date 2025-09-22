@@ -1,14 +1,20 @@
-{
+import 'dotenv/config';
+export default{
   "expo": {
-    "name": "civic-app",
-    "slug": "user-app",  
+    "name": "Tech-app",
+    "slug": "tech-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/appicon.png",
-    "scheme": "userapp",
+    "scheme": "techapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "We need your location to provide navigation to the issue location.",
+        "MGLMapboxAccessToken": process.env.MAPBOX_ACCESS_TOKEN,
+        "UIBackgroundModes": ["location"]
+      },
       "supportsTablet": true
     },
     "android": {
@@ -19,7 +25,12 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
+      "package": "com.anonymous.techapp"
     },
     "web": {
       "output": "static",
@@ -39,19 +50,25 @@
           }
         }
       ],
-      "expo-secure-store",
       [
-        "expo-location",
+        "@rnmapbox/maps",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to report issues accurately.",
-          "isIosBackgroundLocationEnabled": false,
-          "isAndroidBackgroundLocationEnabled": false
+          "RNMapboxMapsDownloadToken": process.env.MAPBOX_ACCESS_TOKEN,
+          "RNMapboxMapsVersion": "11.0.0"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+                "projectId":"e141764f-b398-40db-84c1-e193f60c4773"
+      }
+    },
+    "owner": "mrs29"
   }
 }

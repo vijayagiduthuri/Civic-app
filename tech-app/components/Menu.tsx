@@ -16,7 +16,8 @@ export const MenuModal = ({ visible, onClose, onNavigate }:MenuModalProps):JSX.E
     onRequestClose={onClose}
   >
     <TouchableOpacity
-      className="flex-1 bg-white bg-opacity-50"
+      className="flex-1
+       bg-white bg-opacity-50"
       activeOpacity={1}
       onPress={onClose}
     >
