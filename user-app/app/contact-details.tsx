@@ -1,7 +1,7 @@
-import { useAuth } from '@clerk/clerk-expo';
+import { useAuth, useUser } from '@clerk/clerk-expo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
     Alert,
     KeyboardAvoidingView,
@@ -21,7 +21,22 @@ export default function ContactDetails() {
   const [age, setAge] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoaded } = useUser();
+  const params = useLocalSearchParams();
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const rawParamEmail = (params as Record<string, unknown>)?.email as string | string[] | undefined;
+    const paramEmail = Array.isArray(rawParamEmail) ? rawParamEmail[0] : rawParamEmail;
+
+    const clerkEmail = user?.primaryEmailAddress?.emailAddress || user?.emailAddresses?.[0]?.emailAddress || '';
+    const candidate = (paramEmail && paramEmail.trim()) || clerkEmail;
+
+    if (candidate && candidate !== email) {
+      setEmail(candidate);
+    }
+  }, [isLoaded, params, user?.primaryEmailAddress?.emailAddress, user?.emailAddresses, email]);
 
   const validateForm = () => {
     if (!name.trim()) {
@@ -60,6 +75,33 @@ export default function ContactDetails() {
 
     setIsLoading(true);
     try {
+      // Try to register user on backend (non-blocking)
+      try {
+        const registerResponse = await fetch('https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/authUsers/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: name.trim(),
+            email: email.trim(),
+            phone: phone.trim(),
+            age: parseInt(age),
+          }),
+        });
+
+        if (registerResponse.ok) {
+          const registerJson = await registerResponse.json();
+          if (!registerJson?.success) {
+            console.warn('Registration failed on backend, continuing locally');
+          }
+        } else {
+          console.warn('Registration request failed, continuing locally');
+        }
+      } catch (e) {
+        console.warn('Registration error, continuing locally:', e);
+      }
+
       // Store contact details in AsyncStorage
       const contactDetails = {
         name: name.trim(),
@@ -159,6 +201,8 @@ export default function ContactDetails() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                editable={false}
+                selectTextOnFocus={false}
               />
             </View>
 
