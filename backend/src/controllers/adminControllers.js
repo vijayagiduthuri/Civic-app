@@ -50,7 +50,7 @@ export const createAdmin = async (req, res) => {
 export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    console.log(email,password)
     // 1. Check if admin exists
     const existingAdmin = await selectRows("admin_logins", { email });
 

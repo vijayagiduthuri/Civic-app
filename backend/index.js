@@ -7,6 +7,7 @@ import technicianRoutes from './src/routes/technicianRoutes.js'
 import pendingIssuesRoutes from './src/routes/pendingIssuesRoutes.js'
 import mapRoutes from "./src/routes/mapRoutes.js"
 import adminRoutes from "./src/routes/adminRoutes.js"
+import { startIssuesListener } from "./src/listeners/issueListeners.js";
 
 dotenv.config();
 
@@ -15,7 +16,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-
+startIssuesListener();
 app.use("/api/authUsers", userRoutes);
 app.use("/api/issues",issueRoutes)
 app.use("/api/technicians",technicianRoutes);
