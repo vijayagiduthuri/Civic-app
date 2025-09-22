@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Navbar from "../components/Navbar"
 import {
   Eye,
   UserCheck,
@@ -20,7 +21,6 @@ import {
   TrendingUp,
   Trash2,
   Filter,
-  Badge as BadgeIcon,
   AlertTriangle,
   Droplets,
 } from "lucide-react"
@@ -100,22 +100,6 @@ const Input = ({ className = "", ...props }) => (
   />
 )
 
-const Select = ({ children, value, onValueChange }) => {
-  return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onValueChange(e.target.value)}
-        className="flex h-10 w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {children}
-      </select>
-    </div>
-  )
-}
-
-const SelectItem = ({ value, children }) => <option value={value}>{children}</option>
-
 const Dialog = ({ open, onOpenChange, children }) => {
   if (!open) return null
 
@@ -137,274 +121,155 @@ const DialogHeader = ({ children }) => (
 
 const DialogTitle = ({ children }) => <h2 className="text-lg font-semibold leading-none tracking-tight">{children}</h2>
 
-const Label = ({ children, className = "", ...props }) => (
-  <label
-    className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${className}`}
-    {...props}
-  >
-    {children}
-  </label>
-)
-
 export default function Workers() {
   // Define current page for navigation highlighting
   const currentPage = "workers"
   
+  // Function to generate profile photo based on name
+  const generateProfilePhoto = (name) => {
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase()
+    const colors = [
+      'bg-gradient-to-br from-blue-500 to-blue-600',
+      'bg-gradient-to-br from-green-500 to-green-600',
+      'bg-gradient-to-br from-purple-500 to-purple-600',
+      'bg-gradient-to-br from-orange-500 to-orange-600',
+      'bg-gradient-to-br from-teal-500 to-teal-600',
+      'bg-gradient-to-br from-indigo-500 to-indigo-600',
+      'bg-gradient-to-br from-rose-500 to-rose-600',
+      'bg-gradient-to-br from-cyan-500 to-cyan-600',
+    ]
+    const colorIndex = name.length % colors.length
+    return { initials, color: colors[colorIndex] }
+  }
+
   const [workers] = useState([
     {
       id: "WRK-001",
-      name: "Arjun Singh",
-      photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      name: "Suresh Patil",
       phone: "+91 98765 43210",
-      completedIssues: 45,
+      email: "suresh.patil@sanitation.gov.in",
+      department: "Sewage & Drainage",
+      experience: "8 years",
+      profilePhoto: generateProfilePhoto("Suresh Patil"),
       resolvedIssues: [
         {
-          id: "SAN-2024-001",
-          location: "MG Road & Brigade Road Junction",
-          category: "Waste Management",
-          completedDate: "2024-01-17",
-          priority: "High",
-          description: "Resolved overflowing garbage bin issue by implementing larger capacity bins and more frequent collection schedule. Coordinated with municipal team for permanent solution.",
-        },
-        {
-          id: "SAN-2024-008",
-          location: "Koramangala 4th Block Market",
-          category: "Waste Management", 
-          completedDate: "2024-01-12",
+          id: "SAN-2024-002",
+          title: "Blocked Sewage Drain in Koramangala",
+          location: "Koramangala 4th Block & 80 Feet Road",
+          category: "Sewage & Drainage",
+          completedDate: "2024-01-14",
           priority: "Medium",
-          description: "Cleaned commercial area waste accumulation during festival season. Established temporary collection points for vendors.",
+          description: "Resolved blocked sewage drain with solid waste and debris. Completed emergency repairs to prevent raw sewage overflow and eliminated health hazards in the area.",
         },
-        {
-          id: "SAN-2024-015",
-          location: "Indiranagar 12th Main Road",
-          category: "Waste Management",
-          completedDate: "2024-01-08",
-          priority: "Low",
-          description: "Routine maintenance of residential waste bins and optimization of morning collection routes.",
-        },
-        {
-          id: "SAN-2024-023",
-          location: "Commercial Street Shopping Area",
-          category: "Waste Management",
-          completedDate: "2024-01-04",
-          priority: "High",
-          description: "Emergency cleanup of street waste during heavy footfall weekend. Deployed additional collection vehicles.",
-        }
       ]
     },
     {
       id: "WRK-002",
-      name: "Priya Sharma",
-      photo: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-      phone: "+91 98765 43211", 
-      completedIssues: 52,
+      name: "Lakshmi Devi",
+      phone: "+91 98765 43211",
+      email: "lakshmi.devi@sanitation.gov.in",
+      department: "Public Toilet Maintenance",
+      experience: "6 years",
+      profilePhoto: generateProfilePhoto("Lakshmi Devi"),
       resolvedIssues: [
         {
           id: "SAN-2024-003",
+          title: "Unsanitary Public Restroom at Cubbon Park",
           location: "Cubbon Park Public Restroom",
-          category: "Public Restrooms",
-          completedDate: "2024-01-15",
-          priority: "High",
-          description: "Completely renovated public restroom facilities. Replaced broken fixtures, installed new soap dispensers, and improved ventilation system.",
-        },
-        {
-          id: "SAN-2024-011",
-          location: "Lalbagh Main Gate Restroom",
-          category: "Public Restrooms",
-          completedDate: "2024-01-09",
-          priority: "Medium", 
-          description: "Deep cleaning and sanitization of public restroom. Repaired plumbing issues and restocked supplies including toilet paper and hand sanitizer.",
-        },
-        {
-          id: "SAN-2024-017",
-          location: "Vidhana Soudha Visitor Restroom",
-          category: "Public Restrooms",
-          completedDate: "2024-01-05",
-          priority: "High",
-          description: "Emergency repair of water supply and waste management system in government building restroom during peak visiting hours.",
-        }
-      ]
-    },
-    {
-      id: "WRK-003", 
-      name: "Vikram Reddy",
-      photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-      phone: "+91 98765 43212",
-      completedIssues: 38,
-      resolvedIssues: [
-        {
-          id: "SAN-2024-002",
-          location: "HSR Layout Sector 2 - Main Road", 
-          category: "Drainage System",
-          completedDate: "2024-01-16",
-          priority: "High",
-          description: "Major drainage pipe burst causing street flooding. Repaired pipe infrastructure and restored normal drainage flow within 6 hours.",
-        },
-        {
-          id: "SAN-2024-009",
-          location: "Marathahalli Bridge Underpass",
-          category: "Drainage System",
-          completedDate: "2024-01-11",
-          priority: "Medium",
-          description: "Cleared blocked storm drains under bridge. Removed accumulated debris and improved water flow during monsoon season.",
-        },
-        {
-          id: "SAN-2024-016",
-          location: "Electronic City Main Road",
-          category: "Drainage System", 
-          completedDate: "2024-01-06",
-          priority: "Low",
-          description: "Preventive maintenance of roadside drainage channels. Cleaned manholes and ensured proper water discharge.",
-        }
-      ]
-    },
-    {
-      id: "WRK-004",
-      name: "Anjali Desai",
-      photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face", 
-      phone: "+91 98765 43213",
-      completedIssues: 41,
-      resolvedIssues: [
-        {
-          id: "SAN-2024-004",
-          location: "Whitefield Industrial Area - Service Road",
-          category: "Illegal Dumping",
-          completedDate: "2024-01-14", 
-          priority: "High",
-          description: "Removed large pile of construction debris and household waste. Coordinated with legal team for penalty enforcement against violators.",
-        },
-        {
-          id: "SAN-2024-012",
-          location: "Old Airport Road - Vacant Plot",
-          category: "Illegal Dumping",
-          completedDate: "2024-01-10",
-          priority: "Medium",
-          description: "Cleared illegally dumped electronic waste. Arranged proper disposal through certified e-waste recycling facility.",
-        },
-        {
-          id: "SAN-2024-020",
-          location: "Outer Ring Road - Construction Site",
-          category: "Illegal Dumping",
-          completedDate: "2024-01-02",
-          priority: "High", 
-          description: "Major cleanup operation of construction debris dumped on public land. Installed warning signage and CCTV surveillance.",
-        }
-      ]
-    },
-    {
-      id: "WRK-005",
-      name: "Ravi Patel",
-      photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
-      phone: "+91 98765 43214",
-      completedIssues: 29,
-      resolvedIssues: [
-        {
-          id: "SAN-2024-005",
-          location: "Jayanagar 4th Block - 11th Main Road",
-          category: "Sewer System",
+          category: "Public Toilet Maintenance",
           completedDate: "2024-01-13",
-          priority: "Medium",
-          description: "Replaced broken sewer cover and reinforced surrounding infrastructure to prevent future collapses. Applied safety protocols during repair.",
-        },
-        {
-          id: "SAN-2024-013",
-          location: "Basavanagudi 2nd Stage Residential Area", 
-          category: "Sewer System",
-          completedDate: "2024-01-07",
           priority: "High",
-          description: "Emergency repair of major sewer line blockage causing backflow issues. Restored sanitation services to 200+ households.",
+          description: "Complete renovation of public restroom facilities. Replaced all broken fixtures, installed modern soap dispensers, improved ventilation, and enhanced accessibility features.",
         },
-        {
-          id: "SAN-2024-021",
-          location: "JP Nagar 3rd Phase Main Road",
-          category: "Sewer System",
-          completedDate: "2024-01-01",
-          priority: "Medium",
-          description: "Routine maintenance of sewer line connections and manholes. Prevented potential blockages during monsoon preparedness.",
-        }
-      ]
-    },
-    {
-      id: "WRK-006", 
-      name: "Kavita Nair",
-      photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
-      phone: "+91 98765 43215",
-      completedIssues: 36,
-      resolvedIssues: [
-        {
-          id: "SAN-2024-006",
-          location: "Forum Mall - Hosur Road",
-          category: "Recycling Management", 
-          completedDate: "2024-01-12",
-          priority: "Low",
-          description: "Reorganized recycling collection system and educated mall management on proper waste segregation practices. Implemented color-coded bin system.",
-        },
-        {
-          id: "SAN-2024-014",
-          location: "UB City Mall - Recycling Center",
-          category: "Recycling Management",
-          completedDate: "2024-01-08",
-          priority: "Medium",
-          description: "Upgraded recycling infrastructure and implemented new sorting mechanisms for plastic, paper, and metal waste separation.",
-        },
-        {
-          id: "SAN-2024-022",
-          location: "Phoenix Marketcity - Waste Management Area",
-          category: "Recycling Management",
-          completedDate: "2023-12-30",
-          priority: "Low",
-          description: "Routine maintenance of recycling equipment and training of facility staff on proper waste handling procedures.",
-        }
-      ]
-    },
-    {
-      id: "WRK-007",
-      name: "Suresh Kumar",
-      photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face",
-      phone: "+91 98765 43216", 
-      completedIssues: 33,
-      resolvedIssues: [
         {
           id: "SAN-2024-007",
+          title: "Metro Station Restroom Maintenance",
           location: "Rajajinagar Metro Station",
-          category: "Public Restrooms",
+          category: "Public Toilet Maintenance",
           completedDate: "2024-01-11",
           priority: "High",
           description: "Complete overhaul of metro station restroom facilities. Installed new fixtures, improved accessibility, and enhanced lighting.",
         },
-        {
-          id: "SAN-2024-018",
-          location: "Malleswaram Circle Public Facility",
-          category: "Public Restrooms", 
-          completedDate: "2024-01-03",
-          priority: "Medium",
-          description: "Preventive maintenance and deep sanitization of high-traffic public restroom. Replaced damaged tiles and faucets.",
-        }
       ]
     },
     {
-      id: "WRK-008",
-      name: "Deepika Joshi",
-      photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-      phone: "+91 98765 43217",
-      completedIssues: 44,
+      id: "WRK-003",
+      name: "Ravi Kumar",
+      phone: "+91 98765 43212",
+      email: "ravi.kumar@sanitation.gov.in",
+      department: "Waste Enforcement",
+      experience: "5 years",
+      profilePhoto: generateProfilePhoto("Ravi Kumar"),
       resolvedIssues: [
         {
-          id: "SAN-2024-010",
-          location: "Chickpet Commercial Market",
-          category: "Waste Management",
-          completedDate: "2024-01-10",
-          priority: "High", 
-          description: "Managed major cleanup drive in busy commercial area during festival period. Coordinated with vendor associations for waste segregation.",
+          id: "SAN-2024-004",
+          title: "Illegal Waste Dumping Site",
+          location: "Whitefield Industrial Area - Service Road",
+          category: "Illegal Waste Dumping",
+          completedDate: "2024-01-12",
+          priority: "High",
+          description: "Removed large pile of household waste and construction debris. Coordinated with legal team for penalty enforcement and installed surveillance systems to prevent future dumping.",
         },
+      ]
+    },
+    {
+      id: "WRK-004",
+      name: "Manoj Yadav",
+      phone: "+91 98765 43214",
+      email: "manoj.yadav@sanitation.gov.in",
+      department: "Street Cleaning",
+      experience: "10 years",
+      profilePhoto: generateProfilePhoto("Manoj Yadav"),
+      resolvedIssues: [
         {
-          id: "SAN-2024-019",
-          location: "Gandhi Bazaar Vegetable Market",
-          category: "Waste Management",
-          completedDate: "2024-01-01",
+          id: "SAN-2024-006",
+          title: "Street Sweeping Required on Commercial Street",
+          location: "Commercial Street - Central Bangalore",
+          category: "Street Cleaning",
+          completedDate: "2024-01-10",
           priority: "Medium",
-          description: "Organized daily waste collection from vegetable market. Set up composting system for organic waste management.",
-        }
+          description: "Comprehensive cleaning of heavily littered commercial area. Implemented regular maintenance schedule and coordinated with shopkeepers for waste management best practices.",
+        },
+      ]
+    },
+    {
+      id: "WRK-005",
+      name: "Pradeep Sharma",
+      phone: "+91 98765 43216",
+      email: "pradeep.sharma@sanitation.gov.in",
+      department: "Waste Management",
+      experience: "7 years",
+      profilePhoto: generateProfilePhoto("Pradeep Sharma"),
+      resolvedIssues: [
+        {
+          id: "SAN-2024-008",
+          title: "Waste Management System Overhaul",
+          location: "HSR Layout Residential Area",
+          category: "Waste Management",
+          completedDate: "2024-01-08",
+          priority: "Medium",
+          description: "Reorganized waste segregation system and implemented new collection schedules. Trained local staff on proper waste handling and recycling procedures.",
+        },
+      ]
+    },
+    {
+      id: "WRK-006",
+      name: "Anita Reddy",
+      phone: "+91 98765 43217",
+      email: "anita.reddy@sanitation.gov.in",
+      department: "Public Health",
+      experience: "4 years",
+      profilePhoto: generateProfilePhoto("Anita Reddy"),
+      resolvedIssues: [
+        {
+          id: "SAN-2024-009",
+          title: "Public Health Inspection - Food Market",
+          location: "KR Market Food Section",
+          category: "Public Health",
+          completedDate: "2024-01-07",
+          priority: "High",
+          description: "Conducted comprehensive health inspection of food vendors. Ensured proper hygiene standards and waste disposal practices in the market area.",
+        },
       ]
     }
   ])
@@ -421,8 +286,6 @@ export default function Workers() {
     { href: "/overview", label: "Overview", page: "overview" },
   ]
 
-  const departments = ["All", "Waste Management", "Drainage System", "Public Restrooms", "Illegal Dumping", "Recycling Management", "Sewer System"]
-
   const filteredWorkers = workers.filter((worker) => {
     const matchesSearch =
       worker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -432,22 +295,9 @@ export default function Workers() {
   })
 
   const handleViewResolvedIssues = (worker, e) => {
-    e.stopPropagation() // Prevent card click event
+    e.stopPropagation()
     setSelectedWorker(worker)
     setShowWorkerModal(true)
-  }
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Active":
-        return "bg-green-100 text-green-800"
-      case "On Leave":
-        return "bg-yellow-100 text-yellow-800"
-      case "Inactive":
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
   }
 
   const getPriorityColor = (priority) => {
@@ -463,78 +313,18 @@ export default function Workers() {
     }
   }
 
-  const getRatingStars = (rating) => {
-    const fullStars = Math.floor(rating)
-    const hasHalfStar = rating % 1 !== 0
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
-
-    return (
-      <div className="flex items-center space-x-1">
-        {[...Array(fullStars)].map((_, i) => (
-          <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-        ))}
-        {hasHalfStar && <Star className="h-4 w-4 fill-yellow-200 text-yellow-400" />}
-        {[...Array(emptyStars)].map((_, i) => (
-          <Star key={i} className="h-4 w-4 text-gray-300" />
-        ))}
-        <span className="ml-2 text-sm font-medium text-gray-700">{rating}</span>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white">
-      {/* Top Navigation Bar */}
-      <nav className="bg-gradient-to-r from-sky-600 via-sky-700 to-blue-700 shadow-xl border-b border-sky-500/20 backdrop-blur-sm flex-shrink-0">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-3 group">
-                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                  <Trash2 className="h-5 w-5 text-sky-600 group-hover:text-sky-700 transition-colors duration-300" />
-                </div>
-                <span className="text-white font-bold text-lg tracking-wide drop-shadow-sm">Gov Portal</span>
-              </div>
+      
+       {/* Use Navbar Component */}
+      <Navbar currentPage="workers" selectedIssue={selectedWorker} />     
+                
 
-              <div className="hidden md:flex items-center space-x-2">
-                {navigationItems.map((item) => (
-                  <a
-                    key={item.page}
-                    href={item.href}
-                    className={`px-4 py-2 text-sm font-medium transition-colors duration-300 relative group ${
-                      currentPage === item.page 
-                        ? "text-white font-semibold" 
-                        : "text-sky-100 hover:text-white"
-                    }`}
-                  >
-                    {item.label}
-                    <span 
-                      className={`absolute bottom-0 left-0 w-full h-0.5 bg-sky-300 transform transition-transform duration-300 ${
-                        currentPage === item.page 
-                          ? "scale-x-100" 
-                          : "scale-x-0 group-hover:scale-x-100"
-                      }`}
-                    />
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4 group">
-              <div className="text-white text-sm">
-                <span className="font-semibold drop-shadow-sm">Sanitation Department</span>
-              </div>
-              <div className="w-8 h-8 bg-gradient-to-br from-sky-400 to-sky-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 ring-2 ring-white/20 group-hover:ring-white/40">
-                <User className="h-5 w-5 text-white drop-shadow-sm" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+            
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Only */}
+        {/* Search Bar */}
         <Card className="mb-8 shadow-lg border-sky-100">
           <CardContent className="pt-6">
             <div className="max-w-md">
@@ -551,26 +341,26 @@ export default function Workers() {
           </CardContent>
         </Card>
 
-        {/* Workers Cards with Resolved Issues Button */}
+        {/* Workers Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredWorkers.map((worker) => (
             <Card
               key={worker.id}
-              className="shadow-lg border-sky-100 hover:shadow-xl transition-all duration-300 hover:border-sky-200"
+              className="shadow-lg border-sky-100 hover:shadow-xl transition-all duration-300 hover:border-sky-200 hover:scale-[1.02]"
             >
               <CardContent className="p-6">
-                <div className="space-y-4">
-                  {/* Profile Section */}
-                  <div className="text-center space-y-3">
-                    <div className="relative">
-                      <img
-                        src={worker.photo}
-                        alt={worker.name}
-                        className="w-20 h-20 rounded-full mx-auto object-cover border-4 border-sky-100 shadow-lg"
-                      />
+                <div className="text-center space-y-4">
+                  {/* Profile Photo with margin-top adjustment */}
+                  <div className="flex justify-center mt-4">
+                    <div className={`w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg ring-4 ring-white hover:ring-sky-200 transition-all duration-300 ${worker.profilePhoto.color}`}>
+                      {worker.profilePhoto.initials}
                     </div>
+                  </div>
+
+                  <div className="space-y-3 mt-6">
+                    <h3 className="text-xl font-bold text-sky-900">{worker.name}</h3>
+                    
                     <div className="space-y-2">
-                      <h3 className="text-lg font-bold text-sky-900">{worker.name}</h3>
                       <div className="flex items-center justify-center space-x-2">
                         <Phone className="h-4 w-4 text-sky-500" />
                         <span className="text-sm text-gray-700">{worker.phone}</span>
@@ -578,15 +368,19 @@ export default function Workers() {
                     </div>
                   </div>
 
-                  {/* Resolved Issues Button */}
-                  <div className="pt-2 border-t border-gray-100">
+                  <div className="pt-4 border-t border-gray-100 space-y-2">
+                    <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>{worker.resolvedIssues.length} issues resolved</span>
+                    </div>
+                    
                     <Button
                       onClick={(e) => handleViewResolvedIssues(worker, e)}
-                      variant="outline"
-                      className="w-full flex items-center justify-center space-x-2 hover:bg-sky-50 border-sky-200 text-sky-700"
+                      variant="default"
+                      className="w-full flex items-center justify-center space-x-2"
                     >
-                      <CheckCircle className="h-4 w-4" />
-                      <span>View Resolved Issues</span>
+                      <Eye className="h-4 w-4" />
+                      <span>View Details</span>
                     </Button>
                   </div>
                 </div>
@@ -601,92 +395,117 @@ export default function Workers() {
             <CardContent className="text-center py-12">
               <Users className="h-16 w-16 text-sky-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No workers found</h3>
-              <p className="text-gray-600">Try adjusting your search criteria or filters.</p>
+              <p className="text-gray-600">Try adjusting your search criteria.</p>
             </CardContent>
           </Card>
         )}
       </main>
 
-      {/* Worker Resolved Issues Modal */}
+      {/* Worker Details Modal */}
       <Dialog open={showWorkerModal} onOpenChange={setShowWorkerModal}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center justify-between">
-              <DialogTitle>Issues Resolved by {selectedWorker?.name}</DialogTitle>
+              <DialogTitle>Worker Profile - {selectedWorker?.name}</DialogTitle>
               <Button variant="ghost" size="icon" onClick={() => setShowWorkerModal(false)}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
           </DialogHeader>
+          
           {selectedWorker && (
             <div className="space-y-6">
-              {/* Worker Summary */}
-              <div className="flex items-center space-x-4 p-4 bg-sky-50 rounded-lg border border-sky-200">
-                <img
-                  src={selectedWorker.photo}
-                  alt={selectedWorker.name}
-                  className="w-16 h-16 rounded-full object-cover border-2 border-sky-200"
-                />
-                <div>
-                  <h3 className="text-xl font-bold text-sky-900">{selectedWorker.name}</h3>
-                  <p className="text-sm text-gray-600">{selectedWorker.phone}</p>
+              {/* Worker Profile Card */}
+              <div className="flex items-center space-x-6 p-6 bg-gradient-to-r from-sky-50 to-blue-50 rounded-lg border border-sky-200">
+                <div className={`w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg ring-4 ring-white ${selectedWorker.profilePhoto.color}`}>
+                  {selectedWorker.profilePhoto.initials}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-sky-900 mb-2">{selectedWorker.name}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Phone className="h-5 w-5 text-sky-500" />
+                      <span className="text-gray-700">{selectedWorker.phone}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600">{selectedWorker.resolvedIssues.length}</div>
+                  <div className="text-sm text-gray-600">Issues Resolved</div>
                 </div>
               </div>
 
-              {/* Resolved Issues List */}
+              {/* Resolved Issues Section */}
               <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-sky-900 border-b border-sky-200 pb-2">
-                  Resolved Issues History
-                </h4>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xl font-bold text-sky-900">Resolved Issues History</h4>
+                  <Badge variant="success" className="text-green-700">
+                    {selectedWorker.resolvedIssues.length} Total Resolved
+                  </Badge>
+                </div>
                 
-                {selectedWorker.resolvedIssues.map((issue) => (
-                  <Card key={issue.id} className="border-sky-100 hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <h5 className="font-semibold text-sky-900 text-lg">{issue.id}</h5>
-                            <Badge className={getPriorityColor(issue.priority)}>
-                              {issue.priority} Priority
-                            </Badge>
-                            <Badge variant="outline" className="text-sky-600 border-sky-200">
-                              {issue.category}
-                            </Badge>
+                {selectedWorker.resolvedIssues.length > 0 ? (
+                  <div className="grid gap-4">
+                    {selectedWorker.resolvedIssues.map((issue) => (
+                      <Card key={issue.id} className="border-sky-100 hover:shadow-md transition-shadow">
+                        <CardContent className="p-6">
+                          <div className="space-y-4">
+                            {/* Issue Header */}
+                            <div className="flex items-start justify-between">
+                              <div className="space-y-2">
+                                <div className="flex items-center space-x-3">
+                                  <Badge variant="outline" className="text-sky-600 border-sky-200 font-mono">
+                                    {issue.id}
+                                  </Badge>
+                                  <Badge className={getPriorityColor(issue.priority)}>
+                                    {issue.priority} Priority
+                                  </Badge>
+                                </div>
+                                <h5 className="text-lg font-semibold text-gray-900">{issue.title}</h5>
+                              </div>
+                              <div className="text-right">
+                                <div className="flex items-center space-x-2 text-green-600">
+                                  <CheckCircle className="h-5 w-5" />
+                                  <span className="font-semibold">Completed</span>
+                                </div>
+                                <div className="text-sm text-gray-500">{issue.completedDate}</div>
+                              </div>
+                            </div>
+                            
+                            {/* Issue Details */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="flex items-center space-x-2">
+                                <MapPin className="h-4 w-4 text-sky-500 flex-shrink-0" />
+                                <span className="text-sm text-gray-700">{issue.location}</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Badge variant="secondary" className="text-xs">
+                                  {issue.category}
+                                </Badge>
+                              </div>
+                            </div>
+                            
+                            {/* Issue Description */}
+                            <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-sky-200">
+                              <p className="text-sm text-gray-700 leading-relaxed">{issue.description}</p>
+                            </div>
                           </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                          <div className="flex items-center space-x-2">
-                            <MapPin className="h-4 w-4 text-sky-500" />
-                            <span className="font-medium">Location:</span>
-                            <span>{issue.location}</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                            <span className="font-medium">Completed:</span>
-                            <span>{issue.completedDate}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="bg-gray-50 p-3 rounded-lg">
-                          <p className="text-sm text-gray-700 leading-relaxed">{issue.description}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                
-                {selectedWorker.resolvedIssues.length === 0 && (
-                  <div className="text-center py-8">
-                    <CheckCircle className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500">No resolved issues found for this worker.</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <CheckCircle className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Resolved Issues</h3>
+                    <p className="text-gray-500">This worker hasn't resolved any issues yet.</p>
                   </div>
                 )}
               </div>
 
               {/* Close Button */}
-              <div className="flex justify-end pt-4 border-t">
-                <Button variant="outline" onClick={() => setShowWorkerModal(false)}>
+              <div className="flex justify-end pt-6 border-t">
+                <Button variant="outline" onClick={() => setShowWorkerModal(false)} className="px-8">
                   Close
                 </Button>
               </div>
