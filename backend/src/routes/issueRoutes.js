@@ -8,7 +8,7 @@ import {
   getPendingIssuesByDepartment,
   getActiveIssueCoordinatesByDepartment,
   getNearbyIssuesByIdAndDept,
-  updateIssueStatus,
+  updateIssueStatus,getIssuesByAdminEmail
 } from "../controllers/issuesControllers.js";
 
 const router = express.Router();
@@ -30,5 +30,7 @@ router.post("/active-coordinates", getActiveIssueCoordinatesByDepartment);
 router.post("/nearbyIssue-by-department", getNearbyIssuesByIdAndDept);
 
 router.post("/status",updateIssueStatus)
+
+router.post('/issues-by-department', getIssuesByAdminEmail)
 
 export default router;

@@ -6,6 +6,7 @@ import issueRoutes from './src/routes/issueRoutes.js'
 import technicianRoutes from './src/routes/technicianRoutes.js'
 import pendingIssuesRoutes from './src/routes/pendingIssuesRoutes.js'
 import mapRoutes from "./src/routes/mapRoutes.js"
+import adminRoutes from "./src/routes/adminRoutes.js"
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use("/api/issues",issueRoutes)
 app.use("/api/technicians",technicianRoutes);
 app.use("/api/pendingIssues",pendingIssuesRoutes);
 app.use("/api/map", mapRoutes)
+app.use("/api/admin", adminRoutes);
 
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {

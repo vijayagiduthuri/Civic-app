@@ -351,6 +351,59 @@ export const updateIssueStatus = async (req, res) => {
   }
 };
 
+
+//fetch the issues where department matches the admin's department
+export const getIssuesByAdminEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    // 1. Find admin by email
+    const adminResult = await selectRows("admin_logins", { email }, ["id", "email", "department"]);
+    if (!adminResult.success || !adminResult.data || adminResult.data.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found",
+      });
+    }
+
+    const admin = adminResult.data[0];
+    const department = admin.department;
+
+    if (!department) {
+      return res.status(400).json({
+        success: false,
+        message: "Admin has no department assigned",
+      });
+    }
+
+    // 2. Fetch issues by department
+    const issuesResult = await selectRows("issues", { department });
+
+    if (!issuesResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: issuesResult.error,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      department,
+      issues: issuesResult.data,
+    });
+  } catch (err) {
+    console.error("Error fetching issues by admin email:", err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+=======
 // controllers/uploadController.js
 
 
@@ -396,6 +449,7 @@ export const uploadImage = async (req, res) => {
       success: false,
       message: "Internal server error",
       error: err.message,
+
     });
   }
 };

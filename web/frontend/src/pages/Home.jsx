@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapPin, Trash2, UserPlus, Calendar, CheckCircle, Users, Search, User, X, BarChart3, TrendingUp, Filter, ChevronDown } from 'lucide-react';
+import { MapPin, Trash2, UserPlus, Calendar, CheckCircle, Users, Search, User, X, BarChart3, TrendingUp, Filter, ChevronDown, Droplets, AlertTriangle } from 'lucide-react';
+import Navbar from '../components/Navbar';
 
 const Home = () => {
   const [selectedIssue, setSelectedIssue] = useState(null);
@@ -14,135 +15,191 @@ const Home = () => {
   const mapInstance = useRef(null);
   const markersRef = useRef([]);
 
-  // Mock data for civic issues with upvote counts
+  // Updated issues data to match the Issues page exactly
   const [issues, setIssues] = useState([
     {
-      id: 1,
-      title: 'Broken Street Light',
-      description: 'Street light on Main Street is not working since yesterday. Residents are concerned about safety during night hours.',
-      location: 'Main Street, Block A',
-      latitude: 28.6139,
-      longitude: 77.2090,
-      status: 'pending',
-      date: '2025-09-13',
-      time: '09:30 AM',
-      photo: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=200&fit=crop',
-      department: 'Public Works',
-      reportedBy: 'John Doe',
-      priority: 'Medium',
-      contactNumber: '+91-9876543210',
-      upvotes: 45
-    },
-    {
-      id: 2,
-      title: 'Garbage Collection Missed',
-      description: 'Garbage has not been collected for 3 days in residential area. Creating hygiene issues and bad smell.',
-      location: 'Residential Area, Block B',
-      latitude: 28.6129,
-      longitude: 77.2080,
-      status: 'in-progress',
-      date: '2025-09-12',
-      time: '02:15 PM',
-      photo: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=300&h=200&fit=crop',
-      department: 'Sanitation',
-      reportedBy: 'Jane Smith',
-      priority: 'High',
-      contactNumber: '+91-9876543211',
-      assignedWorker: 'Ram Kumar',
+      id: "SAN-2024-001",
+      title: "Overflowing Garbage Bin at MG Road Junction",
+      photo: "https://images.stockcake.com/public/f/b/4/fb45bb5c-79c3-47c3-aa3b-88cf36aa3352_large/urban-waste-overflow-stockcake.jpg",
+      location: "MG Road & Brigade Road Junction",
+      coordinates: { lat: 12.9716, lng: 77.5946 },
+      latitude: 12.9716,
+      longitude: 77.5946,
+      dateReported: "2024-01-15",
+      date: "2024-01-15",
+      time: "09:30 AM",
+      citizenName: "Rajesh Kumar",
+      citizenEmail: "rajesh.kumar@gmail.com",
+      reportedBy: "Rajesh Kumar",
+      contactNumber: "+91-9876543210",
+      status: "Open",
+      assignedWorker: null,
+      priority: "High",
+      category: "Waste Management",
+      department: "Sanitation",
+      description: "Large garbage bin overflowing with waste, attracting pests and creating unsanitary conditions. Garbage scattered around the area.",
       upvotes: 78
     },
     {
-      id: 3,
-      title: 'Pothole on Highway',
-      description: 'Large pothole causing traffic issues and vehicle damage. Multiple complaints received from commuters.',
-      location: 'Highway 101, Mile 5',
-      latitude: 28.6149,
-      longitude: 77.2100,
-      status: 'resolved',
-      date: '2025-09-11',
-      time: '11:45 AM',
-      photo: 'https://images.unsplash.com/photo-1615906627571-6c3c1e0cc5d6?w=300&h=200&fit=crop',
-      department: 'Public Works',
-      reportedBy: 'Mike Johnson',
-      priority: 'High',
-      contactNumber: '+91-9876543212',
-      resolvedBy: 'Shyam Singh',
-      resolvedDate: '2025-09-13',
-      upvotes: 23
-    },
-    {
-      id: 4,
-      title: 'Water Leak',
-      description: 'Water pipe burst near the park entrance causing water wastage and making the area slippery.',
-      location: 'Central Park, Gate 2',
-      latitude: 28.6159,
-      longitude: 77.2110,
-      status: 'pending',
-      date: '2025-09-13',
-      time: '07:20 AM',
-      photo: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300&h=200&fit=crop',
-      department: 'Water',
-      reportedBy: 'Sarah Wilson',
-      priority: 'Critical',
-      contactNumber: '+91-9876543213',
+      id: "SAN-2024-002",
+      title: "Blocked Sewage Drain in Koramangala",
+      photo: "https://img.freepik.com/premium-photo/storm-drain-clogged-with-trash-debris-causing-flooding-contamination_974629-202395.jpg",
+      location: "Koramangala 4th Block & 80 Feet Road",
+      coordinates: { lat: 12.9352, lng: 77.6245 },
+      latitude: 12.9352,
+      longitude: 77.6245,
+      dateReported: "2024-01-14",
+      date: "2024-01-14",
+      time: "02:15 PM",
+      citizenName: "Priya Sharma",
+      citizenEmail: "priya.sharma@gmail.com",
+      reportedBy: "Priya Sharma",
+      contactNumber: "+91-9876543211",
+      status: "In Progress",
+      assignedWorker: "Suresh Patil",
+      priority: "Medium",
+      category: "Sewage & Drainage",
+      department: "Sanitation",
+      description: "Sewage drain completely blocked with solid waste and debris. Raw sewage overflow causing health hazards and foul smell in the area.",
       upvotes: 92
     },
     {
-      id: 5,
-      title: 'Illegal Dumping',
-      description: 'Construction waste dumped illegally behind shopping center. Environmental concern and violation of city rules.',
-      location: 'Shopping Center, Rear Parking',
-      latitude: 28.6119,
-      longitude: 77.2070,
-      status: 'resolved',
-      date: '2025-09-12',
-      time: '04:30 PM',
-      photo: 'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=300&h=200&fit=crop',
-      department: 'Sanitation',
-      reportedBy: 'Robert Brown',
-      priority: 'Medium',
-      contactNumber: '+91-9876543214',
-      resolvedBy: 'Hari Prasad',
-      resolvedDate: '2025-09-13',
+      id: "SAN-2024-003",
+      title: "Unsanitary Public Restroom at Cubbon Park",
+      photo: "https://www.shutterstock.com/image-photo/dirty-public-toilet-room-600nw-1111510655.jpg",
+      location: "Cubbon Park Public Restroom",
+      coordinates: { lat: 12.9698, lng: 77.5906 },
+      latitude: 12.9698,
+      longitude: 77.5906,
+      dateReported: "2024-01-13",
+      date: "2024-01-13",
+      time: "11:45 AM",
+      citizenName: "Amit Patel",
+      citizenEmail: "amit.patel@yahoo.com",
+      reportedBy: "Amit Patel",
+      contactNumber: "+91-9876543212",
+      status: "Resolved",
+      assignedWorker: "Lakshmi Devi",
+      resolvedBy: "Lakshmi Devi",
+      resolvedDate: "2024-01-15",
+      priority: "High",
+      category: "Public Toilet Maintenance",
+      department: "Sanitation",
+      description: "Public restroom in extremely unsanitary condition. Broken fixtures, clogged toilets, no soap, and poor maintenance affecting public health.",
+      upvotes: 34
+    },
+    {
+      id: "SAN-2024-004",
+      title: "Illegal Waste Dumping Site",
+      photo: "https://circularphiladelphia.org/staging/wp-content/uploads/2022/10/Construction_debris_dumped_709x399.jpg",
+      location: "Whitefield Industrial Area - Service Road",
+      coordinates: { lat: 12.9698, lng: 77.7499 },
+      latitude: 12.9698,
+      longitude: 77.7499,
+      dateReported: "2024-01-12",
+      date: "2024-01-12",
+      time: "04:30 PM",
+      citizenName: "Deepika Reddy",
+      citizenEmail: "deepika.reddy@hotmail.com",
+      reportedBy: "Deepika Reddy",
+      contactNumber: "+91-9876543213",
+      status: "In Progress",
+      assignedWorker: "Ravi Kumar",
+      priority: "High",
+      category: "Illegal Waste Dumping",
+      department: "Sanitation",
+      description: "Large pile of household waste and construction debris illegally dumped. Creating breeding ground for diseases and blocking proper waste management.",
       upvotes: 67
     },
     {
-      id: 6,
-      title: 'Drain Blockage',
-      description: 'Main drainage system blocked causing water logging during recent rains. Immediate attention required.',
-      location: 'Market Street, Near Bus Stop',
-      latitude: 28.6135,
-      longitude: 77.2085,
-      status: 'in-progress',
-      date: '2025-09-13',
-      time: '10:15 AM',
-      photo: 'https://images.unsplash.com/photo-1574263867128-a3d5c1b1deec?w=300&h=200&fit=crop',
-      department: 'Sanitation',
-      reportedBy: 'Priya Sharma',
-      priority: 'High',
-      contactNumber: '+91-9876543215',
-      assignedWorker: 'Manoj Yadav',
-      upvotes: 34
+      id: "SAN-2024-005",
+      title: "Broken Sewer Manhole Cover",
+      photo: "https://media.istockphoto.com/id/1248462267/photo/close-up-of-ruptured-sewer-rusty-pipeline-which-cause-sewage-leakage-stream-and-pollution-old.jpg?s=612x612&w=0&k=20&c=fFaVqjGjC-wVGNc0b7fJtZ7E5cl4AOzM1__QETSlZ5k=",
+      location: "Jayanagar 4th Block - 11th Main Road",
+      coordinates: { lat: 12.9279, lng: 77.5937 },
+      latitude: 12.9279,
+      longitude: 77.5937,
+      dateReported: "2024-01-11",
+      date: "2024-01-11",
+      time: "07:20 AM",
+      citizenName: "Vikram Singh",
+      citizenEmail: "vikram.singh@gmail.com",
+      reportedBy: "Vikram Singh",
+      contactNumber: "+91-9876543214",
+      status: "Open",
+      assignedWorker: null,
+      priority: "High",
+      category: "Sewer System Maintenance",
+      department: "Sanitation",
+      description: "Broken sewer manhole cover creating safety hazard and sewer gas leakage. Raw sewage exposure posing serious health risks to pedestrians.",
+      upvotes: 45
+    },
+    {
+      id: "SAN-2024-006",
+      title: "Street Sweeping Required on Commercial Street",
+      photo: "https://tse4.mm.bing.net/th/id/OIP.B04dWyGds6Tlp1SP0YZPDQHaDt?pid=Api&P=0&h=180",
+      location: "Commercial Street - Central Bangalore",
+      coordinates: { lat: 12.9279, lng: 77.6271 },
+      latitude: 12.9279,
+      longitude: 77.6271,
+      dateReported: "2024-01-10",
+      date: "2024-01-10",
+      time: "10:15 AM",
+      citizenName: "Anita Gupta",
+      citizenEmail: "anita.gupta@rediffmail.com",
+      reportedBy: "Anita Gupta",
+      contactNumber: "+91-9876543215",
+      status: "Resolved",
+      assignedWorker: "Manoj Yadav",
+      resolvedBy: "Manoj Yadav",
+      resolvedDate: "2024-01-12",
+      priority: "Medium",
+      category: "Street Cleaning",
+      department: "Sanitation",
+      description: "Commercial street heavily littered with food waste, plastic bags, and debris. Requires immediate cleaning and regular maintenance schedule.",
+      upvotes: 23
     }
   ]);
 
-  // Worker data with availability status
+  // Worker data with availability status (updated to match issues page workers)
   const [workers] = useState([
-    { id: 1, name: 'Ram Kumar', status: 'available', currentTask: null, phone: '+91-9876543301' },
-    { id: 2, name: 'Shyam Singh', status: 'busy', currentTask: 'Road repair on Highway 15', phone: '+91-9876543302' },
-    { id: 3, name: 'Hari Prasad', status: 'available', currentTask: null, phone: '+91-9876543303' },
-    { id: 4, name: 'Lakshmi Devi', status: 'not-available', currentTask: 'On medical leave', phone: '+91-9876543304' },
-    { id: 5, name: 'Ravi Kumar', status: 'busy', currentTask: 'Cleaning drainage system', phone: '+91-9876543305' },
-    { id: 6, name: 'Manoj Yadav', status: 'available', currentTask: null, phone: '+91-9876543306' }
+    { id: 1, name: 'Suresh Patil', status: 'available', currentTask: null, phone: '+91-9876543301' },
+    { id: 2, name: 'Lakshmi Devi', status: 'busy', currentTask: 'Public toilet maintenance', phone: '+91-9876543302' },
+    { id: 3, name: 'Ravi Kumar', status: 'available', currentTask: null, phone: '+91-9876543303' },
+    { id: 4, name: 'Manoj Yadav', status: 'available', currentTask: null, phone: '+91-9876543304' },
+    { id: 5, name: 'Pradeep Sharma', status: 'available', currentTask: null, phone: '+91-9876543305' }
   ]);
 
-  // Filter issues based on selected status
+  // Convert status format between pages
+  const convertStatusFromIssuesPage = (status) => {
+    switch (status) {
+      case 'Open': return 'pending';
+      case 'In Progress': return 'in-progress';
+      case 'Resolved': return 'resolved';
+      default: return 'pending';
+    }
+  };
+
+  const convertStatusToIssuesPage = (status) => {
+    switch (status) {
+      case 'pending': return 'Open';
+      case 'in-progress': return 'In Progress';
+      case 'resolved': return 'Resolved';
+      default: return 'Open';
+    }
+  };
+
+  // Filter issues based on selected status (convert from issues page format)
   const filteredIssues = statusFilter === 'all' 
     ? issues 
-    : issues.filter(issue => issue.status === statusFilter);
+    : issues.filter(issue => convertStatusFromIssuesPage(issue.status) === statusFilter);
 
   const getStatusColor = (status) => {
-    switch (status) {
+    const convertedStatus = typeof status === 'string' && ['Open', 'In Progress', 'Resolved'].includes(status)
+      ? convertStatusFromIssuesPage(status)
+      : status;
+    
+    switch (convertedStatus) {
       case 'pending': return '#ef4444';
       case 'in-progress': return '#f97316';
       case 'resolved': return '#22c55e';
@@ -151,7 +208,11 @@ const Home = () => {
   };
 
   const getStatusText = (status) => {
-    switch (status) {
+    const convertedStatus = typeof status === 'string' && ['Open', 'In Progress', 'Resolved'].includes(status)
+      ? convertStatusFromIssuesPage(status)
+      : status;
+    
+    switch (convertedStatus) {
       case 'pending': return 'Pending';
       case 'in-progress': return 'In Progress';
       case 'resolved': return 'Resolved';
@@ -159,31 +220,34 @@ const Home = () => {
     }
   };
 
-  const getStatusBgColor = (status) => {
-    switch (status) {
-      case 'pending': return 'bg-red-500';
-      case 'in-progress': return 'bg-orange-500';
-      case 'resolved': return 'bg-green-500';
-      default: return 'bg-gray-500';
-    }
-  };
+  // const getStatusBgColor = (status) => {
+  //   const convertedStatus = typeof status === 'string' && ['Open', 'In Progress', 'Resolved'].includes(status)
+  //     ? convertStatusFromIssuesPage(status)
+  //     : status;
+    
+  //   switch (convertedStatus) {
+  //     case 'pending': return 'bg-red-500';
+  //     case 'in-progress': return 'bg-orange-500';
+  //     case 'resolved': return 'bg-green-500';
+  //     default: return 'bg-gray-500';
+  //   }
+  // };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'Critical': return 'text-red-600 bg-red-100';
-      case 'High': return 'text-orange-600 bg-orange-100';
+      case 'High': return 'text-red-600 bg-red-100';
       case 'Medium': return 'text-yellow-600 bg-yellow-100';
       case 'Low': return 'text-green-600 bg-green-100';
       default: return 'text-gray-600 bg-gray-100';
     }
   };
 
-  // Filter options
+  // Filter options (updated to use converted status counts)
   const filterOptions = [
     { value: 'all', label: 'All Issues', count: issues.length },
-    { value: 'pending', label: 'Pending', count: issues.filter(i => i.status === 'pending').length },
-    { value: 'in-progress', label: 'In Progress', count: issues.filter(i => i.status === 'in-progress').length },
-    { value: 'resolved', label: 'Resolved', count: issues.filter(i => i.status === 'resolved').length }
+    { value: 'pending', label: 'Pending', count: issues.filter(i => convertStatusFromIssuesPage(i.status) === 'pending').length },
+    { value: 'in-progress', label: 'In Progress', count: issues.filter(i => convertStatusFromIssuesPage(i.status) === 'in-progress').length },
+    { value: 'resolved', label: 'Resolved', count: issues.filter(i => convertStatusFromIssuesPage(i.status) === 'resolved').length }
   ];
 
   // Load Leaflet library
@@ -226,9 +290,10 @@ const Home = () => {
   useEffect(() => {
     if (leafletLoaded && window.L && mapRef.current && !mapInstance.current) {
       try {
+        // Center map on Bangalore coordinates (matching the issues locations)
         mapInstance.current = window.L.map(mapRef.current, {
-          center: [28.6139, 77.2090],
-          zoom: 13,
+          center: [12.9716, 77.5946], // MG Road junction coordinates
+          zoom: 12,
           zoomControl: true
         });
 
@@ -265,7 +330,7 @@ const Home = () => {
       console.log(`Filter changed to: ${statusFilter}, updating markers...`);
       updateMapMarkers();
     }
-  }, [statusFilter, leafletLoaded, issues]); // Added issues dependency
+  }, [statusFilter, leafletLoaded, issues]);
 
   // Safe marker update function
   const updateMapMarkers = () => {
@@ -290,12 +355,11 @@ const Home = () => {
       // Get current filtered issues
       const currentFilteredIssues = statusFilter === 'all' 
         ? issues 
-        : issues.filter(issue => issue.status === statusFilter);
+        : issues.filter(issue => convertStatusFromIssuesPage(issue.status) === statusFilter);
 
       console.log(`Filter: ${statusFilter}`);
       console.log(`Total issues: ${issues.length}`);
       console.log(`Filtered issues: ${currentFilteredIssues.length}`);
-      console.log('Filtered issues:', currentFilteredIssues.map(i => `${i.title} (${i.status})`));
 
       // Create new markers for filtered issues
       currentFilteredIssues.forEach((issue, index) => {
@@ -389,7 +453,6 @@ const Home = () => {
       });
 
       console.log(`🎯 SUMMARY: Created ${markersRef.current.length} markers on map for filter "${statusFilter}"`);
-      console.log('Active markers:', markersRef.current.map(m => m.issue.title));
       
     } catch (error) {
       console.error('Error in updateMapMarkers:', error);
@@ -443,7 +506,7 @@ const Home = () => {
         issue.id === selectedIssue.id ? { 
           ...issue, 
           assignedWorker: selectedWorker, 
-          status: 'in-progress' 
+          status: 'In Progress' 
         } : issue
       ));
       
@@ -454,18 +517,19 @@ const Home = () => {
   };
 
   const handleStatusUpdate = (issueId, newStatus) => {
+    const issuesPageStatus = convertStatusToIssuesPage(newStatus);
     setIssues(prev => prev.map(issue => 
       issue.id === issueId ? { 
         ...issue, 
-        status: newStatus,
-        ...(newStatus === 'resolved' ? { resolvedDate: '2025-09-13', resolvedBy: 'Admin' } : {})
+        status: issuesPageStatus,
+        ...(newStatus === 'resolved' ? { resolvedDate: '2024-01-15', resolvedBy: 'Admin' } : {})
       } : issue
     ));
     if (selectedIssue && selectedIssue.id === issueId) {
       setSelectedIssue(prev => ({ 
         ...prev, 
-        status: newStatus,
-        ...(newStatus === 'resolved' ? { resolvedDate: '2025-09-13', resolvedBy: 'Admin' } : {})
+        status: issuesPageStatus,
+        ...(newStatus === 'resolved' ? { resolvedDate: '2024-01-15', resolvedBy: 'Admin' } : {})
       }));
     }
   };
@@ -484,8 +548,8 @@ const Home = () => {
     if (!mapInstance.current || !leafletLoaded) return;
     
     try {
-      // Reset to default view showing all issues
-      mapInstance.current.setView([28.6139, 77.2090], 13, {
+      // Reset to Bangalore overview
+      mapInstance.current.setView([12.9716, 77.5946], 12, {
         animate: true,
         duration: 0.8
       });
@@ -520,7 +584,7 @@ const Home = () => {
           if (targetMarker.marker && targetMarker.marker.openTooltip) {
             targetMarker.marker.openTooltip();
           }
-        }, 1000); // Delay to allow map animation to complete
+        }, 1000);
       }
       
       console.log(`Map focused on: ${issue.title} at [${lat}, ${lng}]`);
@@ -553,7 +617,7 @@ const Home = () => {
       </div>
       <p className="text-xs text-gray-600 mb-2 line-clamp-1">{issue.location}</p>
       <div className="flex justify-between items-center text-xs text-gray-500">
-        <span>{issue.date}</span>
+        <span>{issue.dateReported}</span>
         <span className={`px-2 py-1 rounded-full font-medium ${getPriorityColor(issue.priority)}`}>
           {issue.priority}
         </span>
@@ -569,60 +633,8 @@ const Home = () => {
 
   return (
     <div className="h-screen bg-gradient-to-br from-sky-50 to-white flex flex-col overflow-hidden">
-      {/* Top Navigation Bar */}
-      <nav className="bg-gradient-to-r from-sky-600 via-sky-700 to-blue-700 shadow-xl border-b border-sky-500/20 backdrop-blur-sm flex-shrink-0">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-3 group">
-                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                  <Trash2 className="h-5 w-5 text-sky-600 group-hover:text-sky-700 transition-colors duration-300" />
-                </div>
-                <span className="text-white font-bold text-lg tracking-wide drop-shadow-sm">Gov Portal</span>
-              </div>
-
-              <div className="hidden md:flex items-center space-x-2">
-                {[
-                  { href: "/home", label: "Home", page: "home" },
-                  { href: "/issues", label: "Issues", page: "issues" },
-                  { href: "/workers", label: "Workers", page: "workers" },
-                  { href: "/overview", label: "Overview", page: "overview" },
-                ].map((item) => (
-                  <a
-                    key={item.page}
-                    href={item.href}
-                    className={`px-4 py-2 text-sm font-medium transition-colors duration-300 relative group ${
-                      "home" === item.page 
-                        ? "text-white font-semibold" 
-                        : "text-sky-100 hover:text-white"
-                    }`}
-                  >
-                    {item.label}
-                    <span 
-                      className={`absolute bottom-0 left-0 w-full h-0.5 bg-sky-300 transform transition-transform duration-300 ${
-                        "home" === item.page 
-                          ? "scale-x-100" 
-                          : "scale-x-0 group-hover:scale-x-100"
-                      }`}
-                    />
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4 group">
-              <div className="text-white text-sm">
-                <span className="font-semibold drop-shadow-sm">
-                  {selectedIssue?.department ? `${selectedIssue.department} Department` : 'Sanitation Department'}
-                </span>
-              </div>
-              <div className="w-8 h-8 bg-gradient-to-br from-sky-400 to-sky-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 ring-2 ring-white/20 group-hover:ring-white/40">
-                <User className="h-5 w-5 text-white drop-shadow-sm" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* Use Navbar Component */}
+      <Navbar currentPage="home" selectedIssue={selectedIssue} />
 
       {/* Main Dashboard */}
       <div className={`flex-1 w-full px-4 py-4 flex gap-4 min-h-0 transition-all duration-300 ${showAssignModal ? 'blur-sm' : ''}`}>
@@ -718,7 +730,7 @@ const Home = () => {
                     </div>
                     <div className="flex items-center text-sm">
                       <Calendar className="h-4 w-4 text-sky-600 mr-2" />
-                      <span className="text-gray-700">{selectedIssue.date} at {selectedIssue.time}</span>
+                      <span className="text-gray-700">{selectedIssue.dateReported} at {selectedIssue.time}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-3 text-xs">
                       <div>
@@ -762,7 +774,7 @@ const Home = () => {
                       </div>
                     )}
 
-                    {selectedIssue.status === 'resolved' && selectedIssue.resolvedBy && (
+                    {selectedIssue.status === 'Resolved' && selectedIssue.resolvedBy && (
                       <div className="bg-green-50 p-2 rounded-lg">
                         <span className="text-green-700 font-medium text-sm">Resolved by:</span>
                         <p className="text-green-600 text-sm">{selectedIssue.resolvedBy} on {selectedIssue.resolvedDate}</p>
@@ -770,9 +782,9 @@ const Home = () => {
                     )}
                   </div>
 
-                  {selectedIssue.status !== 'resolved' && (
+                  {selectedIssue.status !== 'Resolved' && (
                     <div className="space-y-2 pt-2 border-t">
-                      {selectedIssue.status === 'pending' && (
+                      {selectedIssue.status === 'Open' && (
                         <button 
                           onClick={() => handleAssignWorker(selectedIssue)}
                           className="w-full bg-sky-600 text-white px-3 py-2 rounded-lg hover:bg-sky-700 transition-colors flex items-center justify-center text-sm"
@@ -783,7 +795,7 @@ const Home = () => {
                       )}
 
                       <div className="flex gap-2">
-                        {selectedIssue.status === 'pending' && (
+                        {selectedIssue.status === 'Open' && (
                           <button 
                             onClick={() => handleStatusUpdate(selectedIssue.id, 'in-progress')}
                             className="flex-1 bg-orange-100 text-orange-700 px-2 py-2 rounded-lg hover:bg-orange-200 transition-colors text-xs"
@@ -836,7 +848,7 @@ const Home = () => {
               <div className="flex items-center space-x-4 text-xs">
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                  <span>Pending</span>
+                  <span>Open</span>
                 </div>
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-orange-500 rounded-full mr-2"></div>

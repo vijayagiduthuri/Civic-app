@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Navbar from "../components/Navbar"
 import {
   Eye,
   UserCheck,
@@ -157,6 +158,7 @@ export default function Issues() {
   const [issues, setIssues] = useState([
     {
       id: "SAN-2024-001",
+      title: "Overflowing Garbage Bin at MG Road Junction",
       photo:
         "https://images.stockcake.com/public/f/b/4/fb45bb5c-79c3-47c3-aa3b-88cf36aa3352_large/urban-waste-overflow-stockcake.jpg",
       location: "MG Road & Brigade Road Junction",
@@ -173,6 +175,7 @@ export default function Issues() {
     },
     {
       id: "SAN-2024-002",
+      title: "Blocked Sewage Drain in Koramangala",
       photo:
         "https://img.freepik.com/premium-photo/storm-drain-clogged-with-trash-debris-causing-flooding-contamination_974629-202395.jpg",
       location: "Koramangala 4th Block & 80 Feet Road",
@@ -183,12 +186,13 @@ export default function Issues() {
       status: "In Progress",
       assignedWorker: "Suresh Patil",
       priority: "Medium",
-      category: "Drainage System",
+      category: "Sewage & Drainage",
       description:
-        "Storm drain completely blocked with leaves, debris, and litter. Water pooling during rain, creating potential flooding risk.",
+        "Sewage drain completely blocked with solid waste and debris. Raw sewage overflow causing health hazards and foul smell in the area.",
     },
     {
       id: "SAN-2024-003",
+      title: "Unsanitary Public Restroom at Cubbon Park",
       photo: "https://www.shutterstock.com/image-photo/dirty-public-toilet-room-600nw-1111510655.jpg",
       location: "Cubbon Park Public Restroom",
       coordinates: { lat: 12.9698, lng: 77.5906 },
@@ -198,12 +202,13 @@ export default function Issues() {
       status: "Resolved",
       assignedWorker: "Lakshmi Devi",
       priority: "High",
-      category: "Public Restrooms",
+      category: "Public Toilet Maintenance",
       description:
-        "Public restroom in extremely unsanitary condition. Broken fixtures, no soap, and poor maintenance affecting public health.",
+        "Public restroom in extremely unsanitary condition. Broken fixtures, clogged toilets, no soap, and poor maintenance affecting public health.",
     },
     {
       id: "SAN-2024-004",
+      title: "Illegal Waste Dumping Site",
       photo:
         "https://circularphiladelphia.org/staging/wp-content/uploads/2022/10/Construction_debris_dumped_709x399.jpg",
       location: "Whitefield Industrial Area - Service Road",
@@ -214,12 +219,13 @@ export default function Issues() {
       status: "In Progress",
       assignedWorker: "Ravi Kumar",
       priority: "High",
-      category: "Illegal Dumping",
+      category: "Illegal Waste Dumping",
       description:
-        "Large pile of construction debris and household waste illegally dumped in service road. Environmental hazard and blocking access.",
+        "Large pile of household waste and construction debris illegally dumped. Creating breeding ground for diseases and blocking proper waste management.",
     },
     {
       id: "SAN-2024-005",
+      title: "Broken Sewer Manhole Cover",
       photo:
         "https://media.istockphoto.com/id/1248462267/photo/close-up-of-ruptured-sewer-rusty-pipeline-which-cause-sewage-leakage-stream-and-pollution-old.jpg?s=612x612&w=0&k=20&c=fFaVqjGjC-wVGNc0b7fJtZ7E5cl4AOzM1__QETSlZ5k=",
       location: "Jayanagar 4th Block - 11th Main Road",
@@ -229,26 +235,28 @@ export default function Issues() {
       citizenEmail: "vikram.singh@gmail.com",
       status: "Open",
       assignedWorker: null,
-      priority: "Medium",
-      category: "Sewer System",
+      priority: "High",
+      category: "Sewer System Maintenance",
       description:
-        "Broken sewer cover creating safety hazard and potential for sewer gas leakage. Cover partially collapsed into opening.",
+        "Broken sewer manhole cover creating safety hazard and sewer gas leakage. Raw sewage exposure posing serious health risks to pedestrians.",
     },
     {
       id: "SAN-2024-006",
+      title: "Street Sweeping Required on Commercial Street",
       photo: "https://tse4.mm.bing.net/th/id/OIP.B04dWyGds6Tlp1SP0YZPDQHaDt?pid=Api&P=0&h=180",
-      location: "Forum Mall - Hosur Road",
+      location: "Commercial Street - Central Bangalore",
       coordinates: { lat: 12.9279, lng: 77.6271 },
       dateReported: "2024-01-10",
       citizenName: "Anita Gupta",
       citizenEmail: "anita.gupta@rediffmail.com",
       status: "Resolved",
       assignedWorker: "Manoj Yadav",
-      priority: "Low",
-      category: "Recycling Management",
+      priority: "Medium",
+      category: "Street Cleaning",
       description:
-        "Multiple recycling bins overflowing with materials scattered by wind. Affecting cleanliness of shopping area.",
+        "Commercial street heavily littered with food waste, plastic bags, and debris. Requires immediate cleaning and regular maintenance schedule.",
     },
+   
   ])
 
   const [selectedIssue, setSelectedIssue] = useState(null)
@@ -279,7 +287,7 @@ export default function Issues() {
 
   const filteredIssues = issues.filter((issue) => {
     const matchesSearch =
-      issue.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       issue.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
       issue.citizenName.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === "All" || issue.status === statusFilter
@@ -417,54 +425,9 @@ export default function Issues() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white">
-      {/* Top Navigation Bar */}
-      <nav className="bg-gradient-to-r from-sky-600 via-sky-700 to-blue-700 shadow-xl border-b border-sky-500/20 backdrop-blur-sm flex-shrink-0">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-3 group">
-                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                  <Trash2 className="h-5 w-5 text-sky-600 group-hover:text-sky-700 transition-colors duration-300" />
-                </div>
-                <span className="text-white font-bold text-lg tracking-wide drop-shadow-sm">Gov Portal</span>
-              </div>
-
-              <div className="hidden md:flex items-center space-x-2">
-                {navigationItems.map((item) => (
-                  <a
-                    key={item.page}
-                    href={item.href}
-                    className={`px-4 py-2 text-sm font-medium transition-colors duration-300 relative group ${
-                      currentPage === item.page 
-                        ? "text-white font-semibold" 
-                        : "text-sky-100 hover:text-white"
-                    }`}
-                  >
-                    {item.label}
-                    <span 
-                      className={`absolute bottom-0 left-0 w-full h-0.5 bg-sky-300 transform transition-transform duration-300 ${
-                        currentPage === item.page 
-                          ? "scale-x-100" 
-                          : "scale-x-0 group-hover:scale-x-100"
-                      }`}
-                    />
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4 group">
-              <div className="text-white text-sm">
-                <span className="font-semibold drop-shadow-sm">Sanitation Department</span>
-              </div>
-              <div className="w-8 h-8 bg-gradient-to-br from-sky-400 to-sky-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 ring-2 ring-white/20 group-hover:ring-white/40">
-                <User className="h-5 w-5 text-white drop-shadow-sm" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-
+      
+      {/* Use Navbar Component */}
+      <Navbar currentPage="issues" selectedIssue={selectedIssue} />
       
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -538,7 +501,7 @@ export default function Issues() {
                         {/* Header */}
                         <div>
                           <div className="flex items-center space-x-3 mb-2">
-                            <h3 className="text-xl font-bold text-sky-900">{issue.id}</h3>
+                            <h3 className="text-xl font-bold text-sky-900">{issue.title}</h3>
                             <Badge variant="outline" className="text-sky-600 border-sky-200">
                               {issue.category}
                             </Badge>
@@ -595,14 +558,14 @@ export default function Issues() {
                           <UserCheck className="h-4 w-4 mr-1" />
                           Assign
                         </Button>
-                        <Button
+                        {/* <Button
                           size="sm"
                           onClick={() => handleStatusUpdate(issue)}
                           className="bg-sky-600 text-white hover:bg-sky-700"
                         >
                           <CheckCircle className="h-4 w-4 mr-1" />
                           Update
-                        </Button>
+                        </Button> */}
                       </div>
                     </div>
                   </div>
@@ -628,7 +591,7 @@ export default function Issues() {
       <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Issue Details - {selectedIssue?.id}</DialogTitle>
+            <DialogTitle>{selectedIssue?.title}</DialogTitle>
           </DialogHeader>
           {selectedIssue && (
             <div className="space-y-6">
@@ -748,7 +711,7 @@ export default function Issues() {
       <Dialog open={showAssignModal} onOpenChange={setShowAssignModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assign Worker - {selectedIssue?.id}</DialogTitle>
+            <DialogTitle>Assign Worker - {selectedIssue?.title}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -788,7 +751,7 @@ export default function Issues() {
       <Dialog open={showStatusModal} onOpenChange={setShowStatusModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Update Status - {selectedIssue?.id}</DialogTitle>
+            <DialogTitle>Update Status - {selectedIssue?.title}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
