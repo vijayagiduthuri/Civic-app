@@ -14,56 +14,10 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-
+import { useUser } from "@clerk/clerk-expo";
 const { width: screenWidth } = Dimensions.get('window');
 
-// Mock data for issue details with three status types
-const issueDetailsData = {
-  '1': {
-    id: '1',
-    title: 'Overflowing Trash Bin',
-    description: 'Trash bin overflowing with garbage, creating unsanitary conditions',
-    reportedDate: '20-09-2025',
-    resolvedDate: '21-09-2025',
-    status: 'resolved' as const,
-    department: 'Sanitation',
-    issueImage: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400',
-    resolutionImage: 'https://images.unsplash.com/photo-1587339278754-94c1effa3a0c?w=400',
-    technician: {
-      name: 'John Smith',
-      id: 'TECH-1234',
-      contact: '+1-555-0123'
-    }
-  },
-  '2': {
-    id: '2',
-    title: 'Broken Street Light',
-    description: 'Street light not working, making the area unsafe at night',
-    reportedDate: '22-09-2025',
-    resolvedDate: null,
-    status: 'in-progress' as const,
-    department: 'Infrastructure',
-    issueImage: 'https://images.unsplash.com/photo-1517400508447-f8dd5184b6f2?w=400',
-    resolutionImage: null,
-    technician: {
-      name: 'Maria Garcia',
-      id: 'TECH-5678',
-      contact: '+1-555-0456'
-    }
-  },
-  '3': {
-    id: '3',
-    title: 'Pothole on Main Road',
-    description: 'Large pothole causing traffic hazards and vehicle damage',
-    reportedDate: '11-12-2024',
-    resolvedDate: null,
-    status: 'pending' as const,
-    department: 'Road Maintenance',
-    issueImage: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=400',
-    resolutionImage: null,
-    technician: null
-  }
-};
+
 
 // Progress tracker component
 const ProgressTracker = ({ status }: { status: 'pending' | 'in-progress' | 'resolved' }) => {
@@ -139,16 +93,84 @@ const ProgressTracker = ({ status }: { status: 'pending' | 'in-progress' | 'reso
 export default function IssueDetailScreen() {
   const { issueId } = useLocalSearchParams<{ issueId: string }>();
   const router = useRouter();
+  const { user } = useUser();
+  const [issue, setIssue] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [currentImage, setCurrentImage] = useState('');
-  
-  const issue = issueDetailsData[issueId as keyof typeof issueDetailsData];
 
-  if (!issue) {
+  React.useEffect(() => {
+    const fetchIssueDetails = async () => {
+      setLoading(true);
+      setError(null);
+      let userId = undefined;
+      const email = user?.primaryEmailAddress?.emailAddress || user?.emailAddresses?.[0]?.emailAddress;
+      if (email) {
+        try {
+          const response = await fetch(
+            'https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/authUsers/get-user',
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email }),
+            }
+          );
+          if (response.ok) {
+            const json = await response.json();
+            if (json?.success && json?.data) {
+              userId = json.data.id;
+              console.log('Fetched user ID:', userId);
+            }
+          }
+        } catch (err) {
+          setError('Failed to fetch user ID');
+          setLoading(false);
+          return;
+        }
+      }
+      if (!userId) {
+        setError('No user ID found');
+        setLoading(false);
+        return;
+      }
+      try {
+        const issuesResponse = await fetch('https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/issues/get-user-issues', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId }),
+        });
+        if (!issuesResponse.ok) {
+          throw new Error(`HTTP error! status: ${issuesResponse.status}`);
+        }
+        const issuesJson = await issuesResponse.json();
+        if (issuesJson.success && issuesJson.data && issuesJson.data[issueId]) {
+          setIssue(issuesJson.data[issueId]);
+        } else {
+          setError('Issue not found');
+        }
+      } catch (err) {
+        setError('Failed to fetch issue details');
+      }
+      setLoading(false);
+    };
+    fetchIssueDetails();
+  }, [issueId, user]);
+
+  if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Issue not found</Text>
+          <Text style={styles.errorText}>Loading issue details...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  if (error || !issue) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error || 'Issue not found'}</Text>
         </View>
       </SafeAreaView>
     );
@@ -216,7 +238,7 @@ export default function IssueDetailScreen() {
         {/* Progress Tracker */}
         <View style={styles.progressSection}>
           <Text style={styles.sectionTitle}>Issue Status</Text>
-          <ProgressTracker status={issue.status} />
+          <ProgressTracker status={issue.status === 'in_progress' ? 'in-progress' : issue.status as 'pending' | 'in-progress' | 'resolved'} />
         </View>
 
         {/* Date Information */}

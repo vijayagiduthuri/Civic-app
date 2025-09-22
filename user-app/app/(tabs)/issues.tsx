@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useUser } from "@clerk/clerk-expo";
 
 interface Issue {
   id: string;
@@ -23,39 +24,6 @@ interface Issue {
   category: string;
 }
 
-// Mock data (temporary)
-const userIssues: Issue[] = [
-  {
-    id: '1',
-    title: 'Broken Street Light',
-    description: 'Street light on Main Street is not working, making the area unsafe at night.',
-    location: 'Main Street, Block A',
-    status: 'open',
-    createdAt: '2 days ago',
-    supportCount: 12,
-    category: 'Infrastructure',
-  },
-  {
-    id: '2',
-    title: 'Pothole on Oak Avenue',
-    description: 'Large pothole causing damage to vehicles and creating traffic hazards.',
-    location: 'Oak Avenue, near City Hall',
-    status: 'in-progress',
-    createdAt: '1 week ago',
-    supportCount: 8,
-    category: 'Road Maintenance',
-  },
-  {
-    id: '3',
-    title: 'Garbage Collection Issue',
-    description: 'Garbage bins not being emptied on scheduled days in residential area.',
-    location: 'Residential Block B',
-    status: 'open',
-    createdAt: '3 days ago',
-    supportCount: 15,
-    category: 'Sanitation',
-  },
-];
 
 // Helper functions
 const getStatusColor = (status: 'open' | 'in-progress' | 'resolved') => {
@@ -79,56 +47,57 @@ const getCategoryColor = (category: string) => {
 
 export default function IssuesScreen() {
   const router = useRouter();
+  const { user } = useUser();
   const [loading, setLoading] = useState(true);
   const [issues, setIssues] = useState<Issue[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // API Integration (commented for now)
-  /*
   const fetchIssues = async () => {
     try {
       setLoading(true);
       setError(null);
-      
-      // Replace with your actual API endpoint
-      const response = await fetch('https://your-api.com/api/issues', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer your-token-here', // Add auth if needed
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      // Get user email and user_id
+      const email = user?.primaryEmailAddress?.emailAddress || user?.emailAddresses?.[0]?.emailAddress;
+      let userId = undefined;
+      if (email) {
+        const response = await fetch(
+          'https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/authUsers/get-user',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+          }
+        );
+        if (response.ok) {
+          const json = await response.json();
+          if (json?.success && json?.data) {
+            userId = json.data.id;
+            console.log('Fetched user ID:', userId);
+          }
+        }
       }
-
-      const data = await response.json();
-      setIssues(data.issues || []);
-      
-    } catch (err) {
-      console.error('Error fetching issues:', err);
-      setError('Failed to load issues. Please try again.');
-      // Fallback to mock data in case of error
-      setIssues(userIssues);
-    } finally {
-      setLoading(false);
-    }
-  };
-  */
-
-  // Mock API simulation
-  const fetchIssues = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Simulate API response
-      setIssues(userIssues);
-      
+      // Fetch all issues
+      const issuesResponse = await fetch('https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/issues/all-issues', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      if (!issuesResponse.ok) {
+        throw new Error(`HTTP error! status: ${issuesResponse.status}`);
+      }
+      const issuesJson = await issuesResponse.json();
+      // Map API data to Issue[]
+      const apiIssues = (issuesJson.data || []).map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        location: '', // No location in API, leave blank
+        status: item.status === 'in_progress' ? 'in-progress' : (item.status === 'pending' ? 'open' : item.status),
+        createdAt: item.createdAt || '',
+        supportCount: item.supportCount || 0,
+        category: item.category || '',
+      }));
+      setIssues(apiIssues);
     } catch (err) {
       console.error('Error fetching issues:', err);
       setError('Failed to load issues. Please try again.');
@@ -140,12 +109,13 @@ export default function IssuesScreen() {
 
   useEffect(() => {
     fetchIssues();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const handleIssuePress = (issueId: string) => {
     router.push({
       pathname: '/IssueDetails/issueDetailScreen',
-      params: { issueId: issueId },
+      params: { issueId },
     });
   };
 
@@ -325,12 +295,14 @@ export default function IssuesScreen() {
                   {/* Footer */}
                   <View className="flex-row justify-between items-center">
                     <View className="flex-row items-center space-x-4">
+                      {/*
                       <View className="flex-row items-center">
                         <Ionicons name="location-outline" size={14} color="#95a5a6" />
                         <Text className="text-gray-500 text-xs ml-1">
                           {issue.location}
                         </Text>
                       </View>
+                      */}
                       <View className="flex-row items-center">
                         <Ionicons name="time-outline" size={14} color="#95a5a6" />
                         <Text className="text-gray-500 text-xs ml-1">
