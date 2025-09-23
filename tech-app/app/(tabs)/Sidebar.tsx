@@ -390,9 +390,9 @@ export default function TechnicianProfileScreen() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const reportsInfo = `Recent Reports:
-• Tasks Completed: 127
-• Average Rating: 4.8/5
-• This Month: 23 tasks
+• Tasks Completed: 2
+• Average Rating: 3.9/5
+• This Month: 6 tasks
 • Response Time: 15 min avg`;
 
       Alert.alert('Work Reports', reportsInfo);

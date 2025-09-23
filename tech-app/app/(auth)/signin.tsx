@@ -1,279 +1,618 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 import {
-  Text,
-  TextInput,
-  TouchableOpacity,
   View,
-  Alert,
-  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  Image,
+  ScrollView,
   StatusBar,
-  Dimensions,
-  Animated,
-} from "react-native";
-import { LinearGradient as BVLinearGradient } from "expo-linear-gradient";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+  Switch,
+  Alert,
+  Modal,
+  TextInput,
+  ActivityIndicator,
+  Platform,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function SignIn() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [emailValid, setEmailValid] = useState(true);
+// Types
+interface TechnicianProfile {
+  id: string;
+  name: string;
+  email: string;
+  department: string;
+  profileImage: string;
+  phone?: string;
+  address?: string;
+}
 
-  const buttonScale = new Animated.Value(1);
+interface WorkSchedule {
+  monday: { start: string; end: string; active: boolean };
+  tuesday: { start: string; end: string; active: boolean };
+  wednesday: { start: string; end: string; active: boolean };
+  thursday: { start: string; end: string; active: boolean };
+  friday: { start: string; end: string; active: boolean };
+  saturday: { start: string; end: string; active: boolean };
+  sunday: { start: string; end: string; active: boolean };
+}
 
-  const validateEmail = (email:string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+// Profile Setting Item Component
+const SettingItem = ({ 
+  iconName, 
+  title, 
+  subtitle, 
+  onPress, 
+  showArrow = true,
+  rightElement = null,
+  iconColor = '#3b82f6',
+  isLogout = false,
+  disabled = false
+}: {
+  iconName: string;
+  title: string;
+  subtitle: string;
+  onPress: () => void;
+  showArrow?: boolean;
+  rightElement?: React.ReactNode;
+  iconColor?: string;
+  isLogout?: boolean;
+  disabled?: boolean;
+}) => (
+  <TouchableOpacity
+    className={`flex-row items-center py-4 px-6 bg-white rounded-2xl mb-3 mx-4 ${disabled ? 'opacity-50' : ''}`}
+    onPress={disabled ? undefined : onPress}
+    style={{
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
+      elevation: 3,
+    }}
+    disabled={disabled}
+  >
+    <View 
+      className="w-10 h-10 rounded-xl mr-4 justify-center items-center"
+      style={{ backgroundColor: isLogout ? '#fee2e2' : '#f0f9ff' }}
+    >
+      <Ionicons
+        name={iconName as any}
+        size={20}
+        color={isLogout ? '#dc2626' : iconColor}
+      />
+    </View>
+    <View className="flex-1">
+      <Text className={`text-base font-semibold ${isLogout ? 'text-red-600' : 'text-gray-900'}`}>
+        {title}
+      </Text>
+      <Text className="text-sm text-gray-500 mt-1">
+        {subtitle}
+      </Text>
+    </View>
+    {rightElement ? rightElement : (
+      showArrow && (
+        <Ionicons 
+          name="chevron-forward" 
+          size={20} 
+          color="#9ca3af" 
+        />
+      )
+    )}
+  </TouchableOpacity>
+);
 
-  const handleEmailChange = (text:string) => {
-    setEmail(text);
-    if (text.length > 0) {
-      setEmailValid(validateEmail(text));
-    } else {
-      setEmailValid(true);
-    }
-  };
+// Section Header Component
+const SectionHeader = ({ title }: { title: string }) => (
+  <Text className="text-lg font-bold text-gray-800 px-4 mb-4 mt-6">
+    {title}
+  </Text>
+);
 
-  const handleSignIn = async () => {
-    if (!email || !password) {
-      setError("Please enter both email and password.");
-      return;
-    }
-    
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
+// Edit Profile Modal Component
+const EditProfileModal = ({ 
+  visible, 
+  onClose, 
+  profile, 
+  onSave 
+}: {
+  visible: boolean;
+  onClose: () => void;
+  profile: TechnicianProfile;
+  onSave: (updatedProfile: TechnicianProfile) => void;
+}) => {
+  const [editedProfile, setEditedProfile] = useState<TechnicianProfile>(profile);
+  const [loading, setLoading] = useState(false);
 
-    setIsLoading(true);
-    setError("");
-
-    // Button press animation
-    Animated.sequence([
-      Animated.timing(buttonScale, {
-        toValue: 0.95,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(buttonScale, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
+  const handleImagePicker = async () => {
     try {
-      await new Promise((res) => setTimeout(res, 2000));
-      router.replace("/(tabs)");
-    } catch (err:any) {
-      setError(err?.message || "Sign in failed. Please try again.");
-      Alert.alert("Sign In Failed", err?.message || "Unable to sign in.");
-    } finally {
-      setIsLoading(false);
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (permissionResult.granted === false) {
+        Alert.alert('Permission Required', 'Permission to access camera roll is required!');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setEditedProfile(prev => ({
+          ...prev,
+          profileImage: result.assets[0].uri
+        }));
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to select image');
     }
   };
 
-  const { height: screenHeight } = Dimensions.get("window");
+  const handleSave = async () => {
+    if (!editedProfile.name.trim() || !editedProfile.email.trim()) {
+      Alert.alert('Error', 'Name and email are required');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      onSave(editedProfile);
+      onClose();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <View className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100">
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
-      <KeyboardAwareScrollView
-        contentContainerStyle={{
-          minHeight: screenHeight,
-          justifyContent: "center",
-          paddingHorizontal: 24,
-          paddingVertical: 40,
-        }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header Illustration */}
-        <View className="items-center mb-8">
-          <View 
-            className="w-20 h-20 rounded-full items-center justify-center mb-4"
-            style={{
-              backgroundColor: '#1089d3',
-              shadowColor: '#1089d3',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 8,
-            }}
-          >
-            <Ionicons name="lock-closed" size={32} color="#fff" />
-          </View>
-          <Text className="text-gray-600 text-base font-medium">Welcome back!</Text>
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
+      <View className="flex-1 bg-white">
+        <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
+          <TouchableOpacity onPress={onClose}>
+            <Text className="text-blue-600 text-base">Cancel</Text>
+          </TouchableOpacity>
+          <Text className="text-lg font-semibold">Edit Profile</Text>
+          <TouchableOpacity onPress={handleSave} disabled={loading}>
+            {loading ? (
+              <ActivityIndicator size="small" color="#3b82f6" />
+            ) : (
+              <Text className="text-blue-600 text-base font-semibold">Save</Text>
+            )}
+          </TouchableOpacity>
         </View>
 
-        {/* Card Container */}
-        <View 
-          className="bg-white rounded-3xl p-8 mx-2"
+        <ScrollView className="flex-1 p-4">
+          <View className="items-center mb-6">
+            <TouchableOpacity onPress={handleImagePicker}>
+              <Image
+                source={{ uri: editedProfile.profileImage }}
+                className="w-24 h-24 rounded-full bg-gray-200 mb-2"
+              />
+              <Text className="text-blue-600 text-sm text-center">Change Photo</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View className="mb-4">
+            <Text className="text-gray-700 font-medium mb-2">Name</Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg p-3 bg-gray-50"
+              value={editedProfile.name}
+              onChangeText={(text) => setEditedProfile(prev => ({ ...prev, name: text }))}
+              placeholder="Enter your name"
+            />
+          </View>
+
+          <View className="mb-4">
+            <Text className="text-gray-700 font-medium mb-2">Email</Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg p-3 bg-gray-50"
+              value={editedProfile.email}
+              onChangeText={(text) => setEditedProfile(prev => ({ ...prev, email: text }))}
+              placeholder="Enter your email"
+              keyboardType="email-address"
+            />
+          </View>
+
+          <View className="mb-4">
+            <Text className="text-gray-700 font-medium mb-2">Phone</Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg p-3 bg-gray-50"
+              value={editedProfile.phone || ''}
+              onChangeText={(text) => setEditedProfile(prev => ({ ...prev, phone: text }))}
+              placeholder="Enter your phone number"
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          <View className="mb-4">
+            <Text className="text-gray-700 font-medium mb-2">Address</Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg p-3 bg-gray-50"
+              value={editedProfile.address || ''}
+              onChangeText={(text) => setEditedProfile(prev => ({ ...prev, address: text }))}
+              placeholder="Enter your address"
+              multiline
+              numberOfLines={3}
+            />
+          </View>
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+};
+
+export default function TechnicianProfileScreen() {
+  const navigation = useNavigation();
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  
+  // Profile data
+  const [profile, setProfile] = useState<TechnicianProfile>({
+    id: 'TECH-2024-0127',
+    name: 'Ramesh',
+    email: 'ramesh.pilla@technician.gov',
+    department: 'Electrical Department',
+    profileImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
+    phone: '+91 9876543210',
+    address: 'Vijayawada, Andhra Pradesh, India'
+  });
+
+  // Load saved preferences on mount
+  useEffect(() => {
+    loadUserPreferences();
+  }, []);
+
+  const loadUserPreferences = async () => {
+    try {
+      const savedNotifications = await AsyncStorage.getItem('notifications_enabled');
+      if (savedNotifications !== null) {
+        setNotificationsEnabled(JSON.parse(savedNotifications));
+      }
+    } catch (error) {
+      console.log('Error loading preferences:', error);
+    }
+  };
+
+  const saveNotificationPreference = async (enabled: boolean) => {
+    try {
+      await AsyncStorage.setItem('notifications_enabled', JSON.stringify(enabled));
+      setNotificationsEnabled(enabled);
+      
+      // Show feedback
+      Alert.alert(
+        'Settings Updated',
+        `Notifications ${enabled ? 'enabled' : 'disabled'} successfully`
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save notification settings');
+    }
+  };
+
+  const handleEditProfile = () => {
+    setEditModalVisible(true);
+  };
+
+  const handleSaveProfile = async (updatedProfile: TechnicianProfile) => {
+    try {
+      // Save to AsyncStorage or send to API
+      await AsyncStorage.setItem('user_profile', JSON.stringify(updatedProfile));
+      setProfile(updatedProfile);
+      Alert.alert('Success', 'Profile updated successfully');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save profile changes');
+    }
+  };
+
+  const handleChangePassword = () => {
+    Alert.alert(
+      'Change Password',
+      'You will be redirected to the password change screen.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Continue', 
+          onPress: () => {
+            // Navigate to change password screen
+            console.log('Navigate to change password');
+            // navigation.navigate('ChangePassword');
+          }
+        }
+      ]
+    );
+  };
+
+  const handleTermsOfService = () => {
+    Alert.alert(
+      'Terms of Service',
+      'Opening civic technician guidelines...',
+      [
+        { text: 'OK', onPress: () => console.log('Navigate to Terms') }
+      ]
+    );
+  };
+
+  const handleWorkSchedule = () => {
+    const scheduleInfo = `Current Schedule:
+• Monday - Friday: 9:00 AM - 5:00 PM
+• Weekend: On-call availability
+• Emergency response: 24/7`;
+
+    Alert.alert(
+      'Work Schedule',
+      scheduleInfo,
+      [
+        { text: 'OK' },
+        { 
+          text: 'Edit Schedule', 
+          onPress: () => console.log('Navigate to schedule editor') 
+        }
+      ]
+    );
+  };
+
+  const handleNotifications = () => {
+    Alert.alert(
+      'Notification Settings',
+      'Configure your notification preferences',
+      [
+        { text: 'Cancel' },
+        { 
+          text: 'Open Settings', 
+          onPress: () => console.log('Navigate to notification settings') 
+        }
+      ]
+    );
+  };
+
+  const handleHelpSupport = () => {
+    const helpOptions = [
+      { text: 'Cancel', style: 'cancel' as const },
+      { text: 'FAQ', onPress: () => console.log('Open FAQ') },
+      { text: 'Contact Support', onPress: () => console.log('Contact support') },
+      { text: 'User Guide', onPress: () => console.log('Open user guide') }
+    ];
+
+    Alert.alert('Help & Support', 'How can we help you?', helpOptions);
+  };
+
+  const handleWorkReports = async () => {
+    setLoading(true);
+    try {
+      // Simulate loading reports
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const reportsInfo = `Recent Reports:
+• Tasks Completed: 127
+• Average Rating: 4.8/5
+• This Month: 23 tasks
+• Response Time: 15 min avg`;
+
+      Alert.alert('Work Reports', reportsInfo);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to load reports');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out of your account?',
+      [
+        { text: 'Cancel', style: 'cancel' as const },
+        {
+          text: 'Sign Out',
+          style: 'destructive' as const,
+          onPress: async () => {
+            try {
+              setLoading(true);
+              
+              // Clear stored data
+              await AsyncStorage.multiRemove(['user_profile', 'auth_token', 'notifications_enabled']);
+              
+              // Navigate to sign-in screen
+              // Replace 'SignIn' with your actual sign-in screen route name
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'signin' as never }],
+              });
+              
+            } catch (error) {
+              setLoading(false);
+              Alert.alert('Error', 'Failed to sign out. Please try again.');
+              console.error('Logout error:', error);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleBackPress = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      // Handle case where there's no previous screen
+      console.log('Navigate to main screen');
+    }
+  };
+
+  const handleMenuPress = () => {
+    Alert.alert(
+      'Options',
+      'Choose an action',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Share Profile', onPress: () => console.log('Share profile') },
+        { text: 'Export Data', onPress: () => console.log('Export data') }
+      ]
+    );
+  };
+
+  return (
+    <View className="flex-1 bg-gray-50">
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      
+      {/* Header */}
+      <View className="bg-white pt-12 pb-6 px-4 border-b border-gray-100">
+        <View className="flex-row items-center justify-between mb-2">
+          <TouchableOpacity onPress={handleBackPress}>
+            <Ionicons name="arrow-back" size={24} color="#374151" />
+          </TouchableOpacity>
+          <Text className="text-lg font-bold text-gray-900">Profile Settings</Text>
+          <TouchableOpacity onPress={handleMenuPress}>
+            <Ionicons name="ellipsis-horizontal" size={24} color="#374151" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        {/* Profile Section */}
+        <View className="bg-white mx-4 mt-6 rounded-2xl p-6" 
           style={{
             shadowColor: '#000',
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.1,
-            shadowRadius: 24,
-            elevation: 12,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.05,
+            shadowRadius: 8,
+            elevation: 3,
           }}
         >
-          
-          {/* Heading */}
-          <Text className="text-center text-[#1089d3] font-bold text-3xl mb-8 tracking-wide">
-            Sign In
-          </Text>
-
-          {/* Email Input */}
-          <View className="mb-4">
-            <View 
-              className={`flex-row items-center bg-gray-50 rounded-2xl px-4 py-4 border-2 ${
-                emailFocused ? 'border-[#12b1d1] bg-blue-50' : 
-                !emailValid ? 'border-red-400 bg-red-50' : 'border-transparent'
-              }`}
-              style={{
-                shadowColor: emailFocused ? '#12b1d1' : '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: emailFocused ? 0.15 : 0.05,
-                shadowRadius: 4,
-                elevation: emailFocused ? 4 : 2,
-              }}
-            >
-              <Ionicons 
-                name="mail-outline" 
-                size={20} 
-                color={emailFocused ? '#12b1d1' : !emailValid ? '#ef4444' : '#9ca3af'} 
+          <View className="flex-row items-center">
+            <View className="relative mr-4">
+              <Image
+                source={{ uri: profile.profileImage }}
+                className="w-16 h-16 rounded-full bg-gray-200"
               />
-              <TextInput
-                placeholder="Enter your email"
-                placeholderTextColor="#9ca3af"
-                value={email}
-                onChangeText={handleEmailChange}
-                onFocus={() => setEmailFocused(true)}
-                onBlur={() => setEmailFocused(false)}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                className="flex-1 ml-3 text-base text-gray-800 font-medium"
-              />
-              {email.length > 0 && (
-                <Ionicons 
-                  name={emailValid ? "checkmark-circle" : "close-circle"} 
-                  size={20} 
-                  color={emailValid ? "#10b981" : "#ef4444"} 
-                />
-              )}
+            </View>
+            
+            <View className="flex-1">
+              <Text className="text-lg font-bold text-gray-900 mb-1">
+                {profile.name}
+              </Text>
+              <Text className="text-sm text-gray-500 mb-1">
+                {profile.email}
+              </Text>
+              <Text className="text-xs text-blue-600 font-medium mb-1">
+                ID: {profile.id}
+              </Text>
+              <Text className="text-xs text-gray-400">
+                {profile.department}
+              </Text>
             </View>
           </View>
+        </View>
 
-          {/* Password Input */}
-          <View className="mb-6">
-            <View 
-              className={`flex-row items-center bg-gray-50 rounded-2xl px-4 py-4 border-2 ${
-                passwordFocused ? 'border-[#12b1d1] bg-blue-50' : 'border-transparent'
-              }`}
-              style={{
-                shadowColor: passwordFocused ? '#12b1d1' : '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: passwordFocused ? 0.15 : 0.05,
-                shadowRadius: 4,
-                elevation: passwordFocused ? 4 : 2,
-              }}
-            >
-              <Ionicons 
-                name="lock-closed-outline" 
-                size={20} 
-                color={passwordFocused ? '#12b1d1' : '#9ca3af'} 
-              />
-              <TextInput
-                placeholder="Enter your password"
-                placeholderTextColor="#9ca3af"
-                value={password}
-                onChangeText={setPassword}
-                onFocus={() => setPasswordFocused(true)}
-                onBlur={() => setPasswordFocused(false)}
-                secureTextEntry={!showPassword}
-                className="flex-1 ml-3 text-base text-gray-800 font-medium"
-              />
-              <TouchableOpacity 
-                onPress={() => setShowPassword(!showPassword)}
-                className="p-1"
-              >
-                <Ionicons 
-                  name={showPassword ? "eye-off-outline" : "eye-outline"} 
-                  size={20} 
-                  color="#9ca3af" 
-                />
-              </TouchableOpacity>
-            </View>
+        {/* General Section */}
+        <SectionHeader title="General" />
+        
+        <SettingItem
+          iconName="person-outline"
+          title="Edit Profile"
+          subtitle="Change profile picture, name, contact info"
+          onPress={handleEditProfile}
+          iconColor="#3b82f6"
+        />
+        
+        <SettingItem
+          iconName="lock-closed-outline"
+          title="Change Password"
+          subtitle="Update and strengthen account security"
+          onPress={handleChangePassword}
+          iconColor="#059669"
+        />
+        
+        <SettingItem
+          iconName="shield-outline"
+          title="Terms of Service"
+          subtitle="Review civic technician guidelines"
+          onPress={handleTermsOfService}
+          iconColor="#7c3aed"
+        />
+        
+        <SettingItem
+          iconName="calendar-outline"
+          title="Work Schedule"
+          subtitle="View and update your work schedule"
+          onPress={handleWorkSchedule}
+          iconColor="#ea580c"
+        />
+
+        {/* Preferences Section */}
+        <SectionHeader title="Preferences" />
+        
+        <SettingItem
+          iconName="notifications-outline"
+          title="Notifications"
+          subtitle="Customize task and system notifications"
+          onPress={handleNotifications}
+          showArrow={false}
+          rightElement={
+            <Switch
+              value={notificationsEnabled}
+              onValueChange={saveNotificationPreference}
+              trackColor={{ false: '#d1d5db', true: '#3b82f6' }}
+              thumbColor={notificationsEnabled ? '#ffffff' : '#f3f4f6'}
+            />
+          }
+          iconColor="#f59e0b"
+        />
+        
+        <SettingItem
+          iconName="help-circle-outline"
+          title="Help & Support"
+          subtitle="Get help with civic app features"
+          onPress={handleHelpSupport}
+          iconColor="#06b6d4"
+        />
+        
+        <SettingItem
+          iconName="document-text-outline"
+          title="Work Reports"
+          subtitle="Access your completed task reports"
+          onPress={handleWorkReports}
+          iconColor="#8b5cf6"
+          disabled={loading}
+          rightElement={loading ? <ActivityIndicator size="small" color="#8b5cf6" /> : null}
+        />
+
+        {/* Logout Section */}
+        <View className="mt-6 mb-8">
+          <SettingItem
+            iconName="log-out-outline"
+            title="Sign Out"
+            subtitle="Securely log out of your account"
+            onPress={handleLogout}
+            showArrow={true}
+            isLogout={true}
+          />
+        </View>
+      </ScrollView>
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        visible={editModalVisible}
+        onClose={() => setEditModalVisible(false)}
+        profile={profile}
+        onSave={handleSaveProfile}
+      />
+
+      {loading && (
+        <View className="absolute inset-0 bg-black bg-opacity-30 justify-center items-center">
+          <View className="bg-white p-6 rounded-2xl">
+            <ActivityIndicator size="large" color="#3b82f6" />
+            <Text className="mt-2 text-gray-700">Loading...</Text>
           </View>
-
-          {/* Login Button */}
-          <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
-            <TouchableOpacity
-              onPress={handleSignIn}
-              disabled={isLoading}
-              className={`w-full rounded-2xl overflow-hidden ${isLoading ? "opacity-70" : ""}`}
-              activeOpacity={0.9}
-            >
-              <BVLinearGradient
-                colors={["#1089d3", "#12b1d1"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                className="w-full py-5 items-center justify-center rounded-2xl"
-                style={{
-                  shadowColor: '#1089d3',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 8,
-                  elevation: 8,
-                }}
-              >
-                {isLoading ? (
-                  <View className="flex-row items-center">
-                    <ActivityIndicator size="small" color="#fff" />
-                    <Text className="text-white font-bold text-lg ml-2">Signing In...</Text>
-                  </View>
-                ) : (
-                  <Text className="text-white font-bold text-lg tracking-wide">Sign In</Text>
-                )}
-              </BVLinearGradient>
-            </TouchableOpacity>
-          </Animated.View>
-
-          {/* Error Message */}
-          {error && (
-            <Animated.View 
-              className="flex-row items-center bg-red-50 px-4 py-4 rounded-2xl mt-6 border border-red-200"
-              style={{
-                shadowColor: '#ef4444',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
-              }}
-            >
-              <View className="w-8 h-8 rounded-full bg-red-100 items-center justify-center">
-                <Ionicons name="alert-circle" size={16} color="#ef4444" />
-              </View>
-              <Text className="text-red-700 text-sm font-medium ml-3 flex-1 leading-5">{error}</Text>
-            </Animated.View>
-          )}
         </View>
-
-        {/* Footer */}
-        <View className="items-center mt-8">
-          <Text className="text-gray-500 text-sm">
-            Signin to access your account.
-          </Text>
-        </View>
-      </KeyboardAwareScrollView>
+      )}
     </View>
   );
 }

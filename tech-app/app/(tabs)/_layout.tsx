@@ -24,7 +24,7 @@ export default function TabLayout() {
 
       {/* Example additional tab */}
       <Tabs.Screen
-        name="profile"
+        name="menu"
         options={{
           title: "Profile",
           tabBarIcon: ({ color, size }) => (
