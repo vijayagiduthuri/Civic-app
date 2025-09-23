@@ -16,7 +16,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-startIssuesListener();
+// startIssuesListener();
 app.use("/api/authUsers", userRoutes);
 app.use("/api/issues",issueRoutes)
 app.use("/api/technicians",technicianRoutes);

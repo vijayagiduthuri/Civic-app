@@ -150,7 +150,7 @@ export default function IssueDetailScreen() {
           setError('Issue not found');
         }
       } catch (err) {
-        setError('Failed to fetch issue details');
+        // setError('Failed to fetch issue details');
       }
       setLoading(false);
     };

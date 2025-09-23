@@ -453,3 +453,76 @@ export const uploadImage = async (req, res) => {
     });
   }
 };
+
+export const getUserIssues = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "user_id is required",
+      });
+    }
+
+    // Call the Supabase function. Ensure the parameter matches the function.
+    const { data, error } = await supabase.rpc("get_user_issues", {
+      p_user_id: userId, // must match the function parameter
+    });
+
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch issues",
+        error: error.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: data || {}, // JSON object keyed by issue_id
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: err.message,
+    });
+  }
+};
+
+export const getAllI = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "user_id is required",
+      });
+    }
+
+    const { data, error } = await supabase.rpc("get_user_overview_issues", {
+      p_user_id: userId,
+    });
+
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch user issues",
+        error: error.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: data || [],  // Array of issues for the specific user
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: err.message,
+    });
+  }
+};

@@ -9,7 +9,6 @@ const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLICABLE_KEY||'';
 function InitialLayout() {
   const { isLoaded, isSignedIn, user } = useUser();
   const router = useRouter();
-
   useEffect(() => {
     const checkUserStatus = async () => {
       if (isLoaded) {
@@ -17,6 +16,7 @@ function InitialLayout() {
           // First, attempt to fetch existing user profile from backend using Clerk email
           try {
             const email = user?.primaryEmailAddress?.emailAddress || user?.emailAddresses?.[0]?.emailAddress;
+            console.log('User email:', email);
             if (email) {
               const response = await fetch(
                 'https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/authUsers/get-user',

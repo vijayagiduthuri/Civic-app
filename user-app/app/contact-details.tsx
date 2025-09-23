@@ -76,6 +76,7 @@ export default function ContactDetails() {
     setIsLoading(true);
     try {
       // Try to register user on backend (non-blocking)
+      console.log('Registering user on backend with:', { name, email, phone, age });
       try {
         const registerResponse = await fetch('https://vapourific-emmalyn-fugaciously.ngrok-free.app/api/authUsers/register', {
           method: 'POST',

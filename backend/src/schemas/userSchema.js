@@ -17,6 +17,10 @@ export const userSchema = Joi.object({
     .integer()
     .optional(), // nullable in DB
 
+    
+  phone: Joi.string()
+    .pattern(/^[0-9]{10,15}$/) // 10–15 digit phone number
+    .required(), // not null in DB
   created_at: Joi.date()
     .optional() // default now(), so usually backend generates it
 });

@@ -8,7 +8,10 @@ import {
   getPendingIssuesByDepartment,
   getActiveIssueCoordinatesByDepartment,
   getNearbyIssuesByIdAndDept,
-  updateIssueStatus,getIssuesByAdminEmail
+  updateIssueStatus,
+  uploadImage,
+  getUserIssues,
+  getAllI
 } from "../controllers/issuesControllers.js";
 
 const router = express.Router();
@@ -31,6 +34,9 @@ router.post("/nearbyIssue-by-department", getNearbyIssuesByIdAndDept);
 
 router.post("/status",updateIssueStatus)
 
-router.post('/issues-by-department', getIssuesByAdminEmail)
+router.post("/upload-image", uploadImage)
 
+router.post("/get-user-issues", getUserIssues);
+
+router.post("/all-issues", getAllI);
 export default router;
