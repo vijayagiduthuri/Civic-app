@@ -464,7 +464,7 @@ export default function TechnicianProfileScreen() {
           </TouchableOpacity>
           <Text className="text-lg font-bold text-gray-900">Profile Settings</Text>
           <TouchableOpacity onPress={handleMenuPress}>
-            <Ionicons name="ellipsis-horizontal" size={24} color="#374151" />
+            <Ionicons name="ellipsis-horizontal" size={24} color="#ffffffff" />
           </TouchableOpacity>
         </View>
       </View>
